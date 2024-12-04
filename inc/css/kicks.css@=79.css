@@ -1,0 +1,596 @@
+/*
+	GoGo Kicks
+	July 2023
+*/
+
+@font-face {
+    font-family: 'grundleblack';
+    src: url('../font/grundle-webfont.woff2') format('woff2'),
+         url('../font/grundle-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+div#kicks_page {
+	padding: 80px 0 80px 0;
+}
+
+div#kicks_nav {
+	background-color: #222222;
+	margin: 0 0 40px 0;
+	border-radius: 12px;
+	box-shadow: 4px 4px 0px rgba(0,0,0,0.7);
+	text-align: left;
+	overflow: hidden;
+}
+div#kicks_nav a {
+	display: inline-block;
+	width: auto;
+	font-size: 20px;
+	color: #CCCCCC;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+div#kicks_nav a span {
+	display: block;
+	padding: 25px 35px 25px 35px;
+}
+div#kicks_nav a:hover {
+	background: #111111;
+	color: #FFEB00;
+}
+div#kicks_nav a.active {
+	color: #FFEB00;
+	background: #111111;
+}
+
+div#kicks_intro {
+	background-color: #c13b2c;
+	background-image: url('../img/kicks/kicks-seamless.jpg');
+	border-radius: 12px;
+	box-shadow: 4px 4px 0px rgba(0,0,0,0.7);
+	min-height: 420px;
+	text-align: left;
+	position: relative;
+	margin: 0 0 40px 0;
+}
+div#kicks_intro div.kicks_text,
+div#kicks_area div.kicks_text {
+	width: 50%;
+	width: calc(100% - 400px);
+}
+div#kicks_intro div.kicks_intro_pad,
+div#kicks_area div.kicks_intro_pad {
+	padding: 60px;
+}
+
+div#kicks_intro h1, 
+div#kicks_intro h2, 
+div#kicks_intro h3, 
+div#kicks_intro p {
+	font-family: 'grundleblack', sans-serif;
+	color: #FFFFFF;
+	text-shadow: 2px 2px 0px rgba(0,0,0,0.7);
+	color: #FFFFFF;
+}
+div#kicks_intro h1 {
+	font-size: 48px;
+	color: #FFEB00;
+}
+div#kicks_intro h2 {
+	font-size: 32px;
+	margin: 0 0 30px 0;
+}
+div#kicks_intro p {
+	font-size: 26px;
+	line-height: 1.2em;
+	margin: 0 0 40px 0;
+}
+div#kicks_intro p.download {
+	font-size: 22px;
+}
+div#kicks_intro p span {
+	color: #FFEB00;
+}
+
+div#kicks_intro div.kicks_char_phone,
+div#kicks_area div.kicks_char_phone {
+	background: url('../img/kicks/kicks-char-phone.png') 0px 0px no-repeat;
+	height: 436px;
+	width: 364px;
+	position: absolute;
+	top: -30px;
+	right: 10px;
+}
+
+div#kicks_intro div.kicks_char_bmx,
+div#kicks_area div.kicks_char_bmx {
+	background: url('../img/kicks/kicks-char-bmx.png') 0px 0px no-repeat;
+	height: 436px;
+	width: 312px;
+	position: absolute;
+	top: -30px;
+	right: 10px;
+}
+
+div.kicks_block {
+	padding: 40px 0 40px 0;
+}
+div.kicks_block_dark {
+	background-color: #222222;
+	background-image: url('../img/kicks/kicks-seamless-dark.jpg');
+	color: #FFFFFF;
+	border-radius: 12px;
+}
+div.kicks_block_full_pad {
+	padding: 40px;
+}
+div.kicks_block_dark h1,
+div.kicks_block_dark h2,
+div.kicks_block_dark h3,
+div.kicks_block_dark p {
+	color: #FFFFFF;
+}
+
+div.kicks_block_section {
+	text-align: left;
+}
+div.kicks_block_section.kicks_image img {
+	width: 100%;
+	height: auto;
+}
+div.kicks_block_section.left {
+	float: left;
+}
+div.kicks_block_section.right {
+	float: right;
+}
+div.kicks_block_section.large {
+	width: 60%;
+	width: calc(100% - 300px);
+	height: auto;
+}
+div.kicks_block_section.small {
+	width: 40%;
+	width: 300px;
+	height: auto;
+}
+div.kicks_block_pad {
+	padding: 40px;
+}
+
+div.kicks_hey {
+	background: url('../img/kicks/kicks_arrow.png');
+	background-position: right center;
+	background-repeat: no-repeat;
+	height: 100px;
+	text-align: right;
+	font-size: 24px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #333333;
+}
+div.kicks_hey_inner {
+	padding: 20px 50px 0 0;
+}
+
+div#kicks_area {
+	background-color: #c13b2c;
+	background-image: url('../img/kicks/kicks-seamless.jpg');
+	border-radius: 12px;
+	box-shadow: 4px 4px 0px rgba(0,0,0,0.7);
+	text-align: left;
+	position: relative;
+	margin: 0 0 40px 0;
+}
+div#kicks_area div.kicks_area_pad {
+	padding: 40px;
+}
+
+div#kicks_area h1, 
+div#kicks_area h2, 
+div#kicks_area h3, 
+div#kicks_area p {
+	font-family: 'grundleblack', sans-serif;
+	color: #FFFFFF;
+	text-shadow: 2px 2px 0px rgba(0,0,0,0.7);
+	color: #FFFFFF;
+}
+div#kicks_area h1 {
+	font-size: 32px;
+	color: #FFEB00;
+}
+div#kicks_area h2 {
+	font-size: 26px;
+	margin: 0 0 30px 0;
+}
+div#kicks_area p {
+	font-size: 26px;
+	line-height: 1.2em;
+	margin: 0 0 40px 0;
+}
+div#kicks_area p.download {
+	font-size: 22px;
+}
+div#kicks_area p span {
+	color: #FFEB00;
+}
+
+div.app_badges {
+	text-align: left;
+}
+div.app_badges.center {
+	text-align: center;
+}
+div.app_badge {
+	width: 150px;
+	height: 50px;
+	display: inline-block;
+	margin: 10px 0px 10px 0px;
+	-webkit-box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.3);
+	-moz-box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.3);
+	box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.3);
+	-webkit-transition: 0.25s;
+    transition: 0.25s;
+	background-size: 150px auto;
+}
+div.app_badge.first {
+	margin: 10px 5px 10px 0px;
+}
+div.app_badge_border {
+	border-bottom: 3px solid #FFEB00;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+div.app_badge:hover {
+	-webkit-box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.7);
+	-moz-box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.7);
+	box-shadow: 0px 0px 50px 0px rgba(246, 149, 32,0.7);
+}
+div.app_badge a {
+	display: block;
+	width: 150px;
+	height: 50px;
+	text-decoration: none;
+}
+div.app_badge.app_badge_android {
+	background-image: url('../img/kicks/app_badges.png');
+	background-position: 0px 50px;
+}
+div.app_badge.app_badge_apple {
+	background-image: url('../img/kicks/app_badges.png');
+	background-position: 0px 0px;
+}
+
+div.kicks_giveaway_page {
+	text-align: center;
+}
+div.kicks_giveaway_page h1 {
+	font-size: 32px;
+	font-family: 'grundleblack', sans-serif;
+}
+div.kicks_voucher_char {
+	background: url('../img/kicks/kicks-char-present.png') top right no-repeat;
+	min-height: 420px;
+	width: 950px;
+	margin: 0 auto 0 auto;
+	background-size: auto 100%;
+}
+div.kicks_voucher_wrapper {
+	width: 500px;
+	margin: 0 auto 0 auto;
+}
+div.kicks_voucher {
+	background: -moz-linear-gradient(180deg, rgba(0,107,239,1) 0%, rgba(0,94,209,1) 100%);
+	background: -webkit-linear-gradient(180deg, rgba(0,107,239,1) 0%, rgba(0,94,209,1) 100%);
+	background: linear-gradient(180deg, rgba(0,107,239,1) 0%, rgba(0,94,209,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#006bef",endColorstr="#005ed1",GradientType=1);
+	
+	border-radius: 18px;
+	
+	-moz-box-shadow: 3px 3px 10px rgba(29,29,33,0.42);
+    -webkit-box-shadow: 3px 3px 10px rgba(29,29,33,0.42);
+    box-shadow: 3px 3px 10px rgba(29,29,33,0.42);
+}
+div.kicks_voucher_inner {
+	padding: 20px;
+}
+div.kicks_terms {
+	margin: 20px 0 20px 0;
+}
+div.kicks_terms p {
+	font-size: 14px;
+	color: #777777;
+}
+
+div.kicks_voucher p.voucher_desc {
+	font-size: 22px;
+	font-family: 'grundleblack', sans-serif;
+	color: #FFEB00;
+	text-shadow: 2px 2px 1px rgba(0,0,0,0.85);
+}
+div.kicks_voucher p.voucher_code {
+	font-size: 28px;
+	font-weight: bold;
+	color: #FFFFFF;
+	text-shadow: 2px 2px 1px rgba(0,0,0,0.85);
+}
+div.voucher_sep {
+	height: 2px;
+	border-bottom: 1px solid #FFFFFF;
+	overflow: hidden;
+	margin: 0 0 10px 0;
+}
+
+div.kicks_success {
+	background: #a8ee00;
+	padding: 14px;
+	font-size: 20px;
+	font-weight: bold;
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	border-radius: 12px;
+	margin: 0 0 15px 0;
+	border: 1px solid #8ac300;
+	color: #333333;
+}
+div.kicks_error {
+	background: #ff0000;
+	padding: 14px;
+	font-size: 20px;
+	font-weight: bold;
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	border-radius: 12px;
+	margin: 0 0 15px 0;
+	border: 1px solid #CC0000;
+	color: #FFFFFF;
+	text-shadow: 2px 2px 1px rgba(0,0,0,0.85);
+}
+
+/* Kicks video */
+div.kicks_video_inner {
+	padding: 40px;
+}
+div.kicks_video_blue {
+	background: #0253a5;
+	background-image: url('../img/kicks/kicks-seamless-blue.jpg');
+	-webkit-box-shadow: 4px 4px 10px 0px rgba(0,0,0,0.85);
+	-moz-box-shadow: 4px 4px 10px 0px rgba(0,0,0,0.85);
+	box-shadow: 4px 4px 10px 0px rgba(0,0,0,0.85);
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	border-radius: 12px;
+	overflow: hidden;
+}
+div.kicks_video_blue h1 {
+	font-family: 'grundleblack', sans-serif;
+	text-shadow: 2px 2px 0px rgba(0,0,0,0.7);
+	font-size: 38px;
+	color: #FFEB00;
+}
+div.kicks_video_blue p {
+	font-size: 20px;
+	line-height: 1.4em;
+	color: #FFFFFF;
+}
+div.kicks_video_blue p a {
+	text-decoration: underline;
+	color: #FFEB00;
+}
+div.kicks_video_blue p span {
+	color: #FFEB00;
+}
+div.kicks_video_blue div.step {
+	padding: 0 0 0 30px;
+	position: relative;
+	min-height: 20px;
+	margin: 0 0 10px 0;
+}
+div.kicks_video_blue div.step p {
+	font-size: 18px;
+	color: #FFFFFF;
+}
+div.kicks_video_blue div.step div.step_num {
+	width: 20px;
+	height: 20px;
+	overflow: hidden;
+	background: #FFFFFF;
+	color: #0253a5;
+	font-size: 16px;
+	text-align: center;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	padding: 2px 0 0 0;
+}
+div.kicks_video_yellow {
+	background: #ffe606;
+}
+
+/* iPad (or small monitor) Styles */
+@media only screen and (min-width: 980px) and (max-width: 1199px) {
+	div.kicks_voucher_char {
+		width: 100%;
+	}
+	div.kicks_voucher_wrapper {
+		width: 500px;
+	}
+}
+/* iPad (or small monitor) Styles */
+@media only screen and (min-width: 768px) and (max-width: 979px) {
+	div#kicks_intro div.kicks_char_phone,
+	div#kicks_area div.kicks_char_phone {
+		background: url(../img/kicks/kicks-char-phone.png) 0px 0px no-repeat;
+		height: 383px;
+		width: 250px;
+		position: absolute;
+		top: -30px;
+		right: 10px;
+		background-size: 100% auto;
+	}
+	div#kicks_intro div.kicks_char_bmx,
+	div#kicks_area div.kicks_char_bmx {
+		background: url(../img/kicks/kicks-char-bmx.png) 0px 0px no-repeat;
+		height: 383px;
+		width: 250px;
+		position: absolute;
+		top: -30px;
+		right: 10px;
+		background-size: auto 100%;
+	}
+	
+	div#kicks_intro div.kicks_text,
+	div#kicks_area div.kicks_text {
+		width: 50%;
+		width: calc(100% - 250px);
+	}
+	
+	div.kicks_voucher_char {
+		width: 100%;
+	}
+	div.kicks_voucher_wrapper {
+		width: 500px;
+	}
+}
+/* Mobile Styles */
+@media only screen and (min-width: 0px) and (max-width: 767px) {
+
+	div#kicks_page {
+		padding: 20px 5px 80px 5px;
+	}
+	
+	div.kicks_intro_top {
+		height: 50px;
+	}
+	
+	div#kicks_intro div.kicks_char_phone,
+	div#kicks_area div.kicks_char_phone {
+		background: url('../img/kicks/kicks-char-phone.png') 0px 0px no-repeat;
+		height: 380px;
+		width: 300px;
+		background-size: 100% auto;
+		position: relative;
+		top: -50px;
+		right: auto;
+		margin: 0px auto 0 auto;
+	}
+	
+	div#kicks_area div.kicks_char_phone {
+		height: 300px;
+		width: 300px;
+		background-size: auto 100%;
+		background-position: top center;
+		position: relative;
+		top: -50px;
+		right: auto;
+		margin: 0px auto 0 auto;
+	}
+	
+	div#kicks_intro div.kicks_char_bmx,
+	div#kicks_area div.kicks_char_bmx {
+		background: url('../img/kicks/kicks-char-bmx.png') 0px 0px no-repeat;
+		height: 380px;
+		width: 300px;
+		background-size: auto 100%;
+		background-position: center center;
+		position: relative;
+		top: -50px;
+		right: auto;
+		margin: 0px auto 0 auto;
+	}
+	
+	div#kicks_nav a {
+		display: inline-block;
+		width: auto;
+		font-size: 16px;
+		color: #CCCCCC;
+		font-weight: bold;
+		text-transform: uppercase;
+	}
+	div#kicks_nav a span {
+		display: block;
+		padding: 15px 20px 15px 20px;
+	}
+
+	div.kicks_block {
+		padding: 20px;
+	}
+	div#kicks_intro div.kicks_text,
+	div#kicks_area div.kicks_text {
+		width: 100%;
+	}
+	div#kicks_intro div.kicks_intro_pad,
+	div#kicks_area div.kicks_intro_pad {
+		padding: 20px;
+	}
+	div#kicks_area div.kicks_intro_pad {
+		padding: 0px 10px 20px 10px;
+	}
+	div#kicks_intro h1 {
+		font-size: 36px;
+	}
+	div#kicks_intro h2 {
+		font-size: 26px;
+	}
+	div#kicks_intro p {
+		font-size: 24px;
+	}
+	
+	div.kicks_block_full_pad {
+		padding: 10px;
+	}
+	div.kicks_block_section.kicks_image {
+		text-align: center;
+	}
+	div.kicks_block_section.kicks_image img {
+		width: 100%;
+		max-width: 240px;
+		height: auto;
+		margin: 0 auto 0 auto;
+	}
+	div.kicks_block_section.left {
+		float: none;
+	}
+	div.kicks_block_section.right {
+		float: none;
+	}
+	div.kicks_block_section.large {
+		width: 100%;
+	}
+	div.kicks_block_section.small {
+		width: 100%;
+	}
+	div.kicks_block_pad {
+		padding: 10px;
+	}
+	
+	
+	div.kicks_giveaway_page h1 {
+		display: none;
+	}
+	div.kicks_voucher_char {
+		width: 100%;
+		background-size: auto 250px;
+		text-align: center;
+		padding: 20px 0 0 0;
+	}
+	div.kicks_voucher_wrapper {
+		width: 85%;
+	}
+	div.kicks_voucher p.voucher_desc {
+		font-size: 18px;
+	}
+	
+	div#kicks_area div.kicks_area_pad {
+		padding: 20px;
+	}
+	
+	div.app_badges {
+		text-align: center;
+	}
+}

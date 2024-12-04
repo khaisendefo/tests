@@ -1,0 +1,71 @@
+/* Stores | Author: Mark Willis */
+var store_image;
+function single_store_photos() {
+	var image_count = $('div.store_photo').length;
+	if(image_count >= 2) {
+		// Init image scrolling
+		store_image_scroll();
+	}
+}
+function store_image_scroll() {
+	// Show arrows
+	$('div#sin').show();
+	// Bind arrows
+	$('a.store_image_nav').bind('click', function() {
+		var thisid = $(this).attr('id').split('_');
+		var direction = thisid[1];
+		store_image_nav(direction);
+		return false;
+	}); 
+	store_image = setTimeout(function() {change_store_image();}, 5000);
+}
+function store_image_nav(direction) {
+	if(direction == 'left') {
+		$('div#store_photos div.store_photo:first').show();
+		$('div#store_photos div.store_photo:last').hide();
+		clearTimeout(store_image);
+	}
+	else{
+		$('div#store_photos div.store_photo:first').hide();
+		$('div#store_photos div.store_photo:last').show();
+		clearTimeout(store_image);
+	}
+}
+function change_store_image() {
+	if($('div#store_photos div.store_photo:first').is(':visible')) {
+		// We go right...
+		store_image_nav('right');
+	}
+	else{
+		// We go left
+		store_image_nav('left');
+	}
+	store_image = setTimeout(function() {change_store_image();}, 5000);
+}
+
+function no_store_saveinfo() {
+	$('input#submit_ri').bind('click', function() {
+		var send_data = $('form#ri_form').serialize();
+		$('div#loading_mask')
+			.width($('div#ri_form_holder').width())
+			.height($('div#ri_form_holder').height())
+			.show();
+		$.ajax({
+			url: docRoot + 'ajax/?do=save_store_interest',
+			type: 'post',
+			data: send_data,
+			success: function(data) {
+				if(data == '1') {
+					// Ok
+					$('div#ri_form_holder').hide();
+					$('div#ri_form_done').show();
+				}
+				else{
+					// Error
+					alert(data);
+				}
+				$('div#loading_mask').hide();
+			}
+		});
+	});
+}

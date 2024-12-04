@@ -1,0 +1,93 @@
+/* Contact page | Author: Mark Willis */
+// Search trigger ID
+var search_trigger = 0;
+var timeout;
+var timeout_delay = 1000;
+function contact_page() {
+	// Bind skip button
+	$('a#skip_faq, a#skip_faq_2').bind('click', function() {
+		if($('div#send_form').is(':visible')) {
+			// Skip
+			$('html,body').animate({
+				scrollTop: $("a#contactform").offset().top - 30
+			}, 800);
+		}
+		else{
+			$('div#send_form').fadeIn();
+			$('html,body').animate({
+				scrollTop: $("a#contactform").offset().top - 30
+			}, 800);
+		}
+		return false;
+	});
+	bind_faq_search();
+}
+function bind_faq_search() {
+	// Bind search FAQ
+	$('input#search_faq').bind('keyup', function() {
+		if(timeout) {
+			clearTimeout(timeout);
+		}
+		timeout = setTimeout('fire_instant_faq()', timeout_delay);
+		// Hide any warnings
+		$('div#faq_message').hide();
+	});
+}
+function fire_instant_faq() {
+	// Question to query
+	var text_search = $('input#search_faq').val();
+	
+	// Check if string length is good
+	if(text_search.length <= 3) {
+		$('div#faq_message').html('<div class="noticebox">Keep typing...</div>').show();
+	}
+	else{
+		// Hide skip button
+		$('a#skip_faq').hide();
+		// Show loader mask
+		$('div#faq_mask')
+			.width($('div#faq_load').width())
+			.height($('div#faq_load').height())
+			.show();
+		$.ajax({
+			url: docRoot + 'ajax/?do=instant_faq&input='+escape(text_search),
+			dataType: 'json',
+			success: function(data) {
+				if(data.count > 0) {
+					process_faqs(true, data.response);
+				}
+				else{
+					process_faqs(false, data.response);
+				}
+			}
+		});
+	}
+}
+// Push markup, finish interface
+function process_faqs(found_answer, html_data) {
+	if(found_answer) {
+		$('div#faq_load').html(html_data).show();
+		/*
+		$('html,body').animate({
+			scrollTop: $("input#search_faq").offset().top
+			}, 300);
+			*/
+	}
+	else{
+		$('div#faq_load').html(html_data).show();
+	}
+	// Show skip button
+	$('div#contact_button_holder').show();
+	// Re-enable search faq box
+	//$('input#search_faq').removeAttr('disabled');
+	// Hide loader
+	$('div#faq_mask').hide();
+}
+function faq_page() {
+	$('a.showhide_faq').bind('click', function() {
+		var thisid = $(this).attr('id').split('_');
+		var faq_id = thisid[1];
+		$('div#answer_'+faq_id).toggle();
+		return false;
+	});
+}

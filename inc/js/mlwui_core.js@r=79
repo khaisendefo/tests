@@ -1,0 +1,397 @@
+/*
+	MLW UI Core
+	v1.0.3
+	Author: MarkWillis.co.uk
+	
+	Requires: jquery-1.10.1
+	
+	var docRoot must be set in head of page markup
+*/
+
+var temp_callback;
+var return_does_what;
+var esc_does_what;
+
+$(document).keyup(function (e) {
+	if ((e.keyCode === 13)) {
+		if(return_does_what) {
+			return_does_what();
+		}
+	}
+	if ((e.keyCode === 27)) {
+		if(esc_does_what) {
+			esc_does_what();
+		}
+	}
+});
+/*
+// Change page 
+function change_page(url) {
+	change_page_absolute(docRoot + url);
+	return false;
+}
+// Provide absolute url to navigate to
+function change_page_absolute(url) {
+	window.location.href = url;
+	return false;
+}
+
+// Mask main_page
+function mask_main_page(action) {
+	// Mask area
+	if(action == 1) {
+		$('div#main_page_mask')
+			.width($('div#main_page').width())
+			.height($('div#main_page').height())
+			.show();
+	}
+	// Unmask
+	else {
+		$('div#main_page_mask').hide();
+	}
+}
+
+function base_url_full(location_input) {
+  var a = document.createElement('a');
+  a.href = location_input;
+  // hopefully the a will get garbage collected...
+  return a.protocol + '//' + a.hostname;
+}
+function base_url(location_input) {
+	var output = base_url_full(location_input);
+	output = output.replace('http://www.', '');
+	output = output.replace('https://www.', '');
+	output = output.replace('http://', '');
+	output = output.replace('https://', '');
+	return output;
+}
+
+// Report: Error / message / warning /etc
+function page_report(target, class_name, text) {
+	$(target).addClass(class_name).html(text).show();
+}
+// Hide report
+function page_report_hide(target) {
+	$(target).hide();
+}
+
+
+function mask_ui(mask) {
+	// Mask
+	if(mask == 1) {
+		var doc_size = document_size();
+		$('div#ui_mask')
+			.height(doc_size['y'])
+			.width(doc_size['x'])
+			.show();
+	}
+	// Unmask
+	else{
+		$('div#ui_mask').hide();
+	}
+}
+function overmask_ui(mask) {
+	// Mask
+	if(mask == 1) {
+		var doc_size = document_size();
+		$('div#ui_overmask')
+			.height(doc_size['y'])
+			.width(doc_size['x'])
+			.show();
+	}
+	// Unmask
+	else{
+		$('div#ui_overmask').hide();
+	}
+}
+
+function viewport_size() {
+	var array = new Array();
+	array['x'] = $(window).width();
+	array['y'] = $(window).height();
+	return array;
+}
+function document_size() {
+	var array = new Array();
+	array['x'] = $(document).width();
+	array['y'] = $(document).height();
+	return array;
+}
+
+// DEPRECIATED-- Element to focus:string - 'div#example' | unhide_element: true/false, fadein_speed:int
+function position_this(element_focus, unhide_element, fadein_speed) {
+	// Position
+	var doc_size = viewport_size();
+	var x = Math.round((doc_size['x'] / 2) - ($(element_focus).width() / 2));
+	var y = Math.round((doc_size['y'] / 2) - ($(element_focus).height() / 2));
+	$(element_focus)
+		.offset({ top: y, left: x })
+		.hide()
+		.removeClass('hide_entry');
+	if(unhide_element) {
+		$(element_focus)
+			.fadeIn(fadein_speed);
+	}
+}
+*/
+function mlw_viewport_size() {
+	var array = new Array();
+	array['x'] = $(window).width();
+	array['y'] = $(window).height();
+	return array;
+}
+
+// Position an element middle of screen
+function position_this_viewport(element_focus, unhide_element, fadein_speed) {
+	// Position
+	var doc_size = mlw_viewport_size();
+	var x = Math.round((doc_size['x'] / 2) - ($(element_focus).width() / 2));
+	var y = Math.round((doc_size['y'] / 2) - ($(element_focus).height() / 2));
+	
+	var scrollPos = $(document).scrollTop();
+	
+	// Fix for off screen
+	y = y < 0 ? 0 : y;
+	
+	// Add scroll pos
+	y = y + scrollPos;
+	
+	$(element_focus)
+		.offset({ top: y, left: x })
+		.hide()
+		.removeClass('hide_entry');
+	if(unhide_element) {
+		$(element_focus)
+			.fadeIn(fadein_speed);
+	}
+}
+
+
+/* UI Alerts WRAPPERS */
+function ui_alert(text) {
+	$().mlwui_alert({close:true});
+	$().mlwui_alert({text:text});
+	return false;
+}
+function ui_alert_close() {
+	$().mlwui_alert({close:true});
+	return false;
+}
+
+/* UI Alerts */
+(function ( $ ) {
+	$.fn.mlwui_alert = function( options ) {
+
+		// Default options
+		var settings = $.extend({
+			close: false,
+			start_loading: false,
+			finish_loading: false,
+			error_text: false,
+			text: "Text",
+			width: "auto",
+			height: "auto",
+			mask_ui: true,
+			attach_to: 'div#main_wrapper',
+			ok_button: 'OK',
+			ok_button_call: false,
+			cancel_button: false,
+			markup: false,
+			on_open: false,
+			ajax_url: false,
+			ajax_send_data: '',
+			close_button: false,
+			nopadding: false,
+			fixed: false
+		}, options );
+		
+		var viewport_width = new Array();
+		viewport_width['x'] = $(window).width();
+		viewport_width['y'] = $(window).height();
+		
+		// If we have no alert already in existence...
+		if(0 == $('div#ui_alert').length && false !== settings.error_text) {
+			// Create alert prompt
+			$().mlwui_alert({
+				text: '&nbsp;',
+				ok_button: 'Close'
+			});
+		}
+		// We must have an already open UI Alert
+		$('div#ui_alert_message').removeClass('ui_alert_errorbox').html('');
+		if(false !== settings.error_text) {
+			$('div#ui_alert_message').addClass('ui_alert_errorbox').html(settings.error_text);
+		}
+		
+		// Close call? - Stops anything else happening
+		if(true === settings.close) {
+			$('div#ui_alert').remove();
+			mask_ui(0);
+			return false;
+		}
+		
+		// Does the target element exist?
+		if($(settings.attach_to).length == 0) {
+			console.log('mlwui_core: Attach to '+(settings.attach_to)+' failed. Does that element exist?');
+			return false;
+		}
+		
+		// Loading?
+		// Set loading to true - stops anything else happening
+		if(true === settings.start_loading) {
+			// We must have an already open UI Alert
+			if($('div#ui_alert').length > 0) {
+				$('div#ui_alert_controls').hide();
+				$('div#ui_alert_ajax').hide();
+				$('div#ui_alert_loading').show();
+			}
+			return false;
+		}
+		// Set loading to false - stops anything else happening
+		if(true === settings.finish_loading) {
+			// We must have an already open UI Alert
+			if($('div#ui_alert').length > 0) {
+				$('div#ui_alert_controls').show();
+				$('div#ui_alert_ajax').show();
+				$('div#ui_alert_loading').hide();
+				return false;
+			}
+		}
+		
+		// Create new ui_alert...
+		
+		// Mask UI?
+		if(true === settings.mask_ui) {
+			mask_ui(1);
+		}
+		
+		// Width of pop-over?
+		var alert_width = '';
+		if("auto" != settings.width) {
+			alert_width = (settings.width > viewport_width['x']) ? 'width: 100%;' : 'width: '+settings.width+'px;';
+		}
+		
+		// Height of pop-over?
+		var alert_height = '';
+		if("auto" != settings.height) {
+			alert_height = (settings.height > viewport_width['y']) ? 'height: 100%' : 'height: '+settings.height+'px;';
+		}
+		
+		// Create pop-over
+		
+		// Close button?
+		var close_button = '';
+		if(true === settings.close_button) {
+			close_button = '<a href="#" onclick="return ui_alert_close();" class="close_button">X</a>';
+		}
+		
+		var ui_alert_inner_class = "";
+		if(true === settings.nopadding) {
+			ui_alert_inner_class = 'ui_alert_inner_nopad';
+		}
+		
+		var alert_fixed = '';
+		if(true === settings.fixed) {
+			alert_fixed = 'position: fixed;';
+		}
+		
+		// Markup construction
+		var html = '<div id="ui_alert" style="'+alert_width+alert_height+alert_fixed+'">'+close_button+'<div id="ui_alert_inner" class="'+ui_alert_inner_class+'" style="'+alert_width+alert_height+'">';
+		html += '<div id="ui_alert_message"></div>';
+		if(false === settings.ajax_url) {
+			html += '<p class="head">'+settings.text+'</p>';
+		}
+		
+		// Add custom markup?
+		if(false !== settings.markup) {
+			html += settings.markup;
+		}
+		
+		// Control buttons
+		if(false === settings.ajax_url) {
+			html += '<div id="ui_alert_controls">';
+			if(settings.cancel_button) {
+				html += '<a href="#" id="alert_cancel" onclick="return ui_alert_close();" class="button_flat button_flat_red">Cancel</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+				html += '<a href="#" id="alert_accept" onclick="return '+settings.ok_button_call+';" class="button_flat button_flat_green">'+settings.ok_button+'</a>';
+			}
+			else {
+				html += '<a href="#" id="alert_cancel" onclick="return ui_alert_close();" class="button_flat button_flat_green">'+settings.ok_button+'</a>';
+			}
+			html += '</div>';
+		}
+		
+		// Loading animation
+		html += '<div id="ui_alert_loading" class="align_center" style="display: none;"><span style="font-size: 20px;"><i class="ion-load-b ion-loading-b"></i></span></div>';
+		
+		// Markup construction
+		html += '<div id="ui_alert_ajax"></div></div></div>';
+		
+		if($('div#ui_alert').length > 0) {
+			$('div#ui_alert').remove();
+			console.log("Removed old alert");
+		}
+		$(settings.attach_to).prepend(html);
+		
+		// Position
+		position_this_viewport('div#ui_alert', true, 0);
+		
+		// Ajax call?
+		if(false !== settings.ajax_url) {
+			$('div#ui_alert_ajax').html('');
+			$.ajax({
+				url: settings.ajax_url,
+				type: 'POST',
+				data: settings.ajax_send_data,
+				success: function(data) {
+					$('div#ui_alert_ajax').html(data);
+					if("auto" == settings.height) {
+						// re-Position
+						position_this_viewport('div#ui_alert', true, 0);
+					}
+					// On open callback (when ajax)
+					if(false !== settings.on_open) {
+						settings.on_open();
+					}
+				},
+				error: function(data) {
+					html += 'Error loading resource.';
+				}
+			});
+		}
+		
+		if(false === settings.ajax_url) {
+			// On open callback (when no ajax)
+			if(false !== settings.on_open) {
+				settings.on_open();
+			}
+		}
+		
+		return false;
+	};
+}( jQuery ));
+
+function mlwui_bind_item_control() {
+	$('a.mlw_item_control_btn').on('click', function() {
+		var thisid = $(this).attr('id').split('_');
+		var targetid = 'ul#item_'+thisid[2];
+		if($(targetid).is(':visible')) {
+			$(targetid).slideUp(150);
+			$(this).removeClass('active');
+			$(document).unbind('click');
+		}
+		else {
+			$('ul.item_controls').hide();
+			$('a.mlw_item_control_btn').removeClass('active');
+			$(this).addClass('active');
+			$(targetid).slideDown(150);
+			$(document).click(function(event) {
+				if(! $(event.target).closest(targetid).length) {
+					$(targetid).slideUp(150);
+					$('a.mlw_item_control_btn').removeClass('active');
+					$(document).unbind('click');
+				}
+			});
+		}
+		return false;
+	});
+}

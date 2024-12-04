@@ -1,0 +1,496 @@
+/*
+	Pizza GOGO
+	Global functions
+*/
+
+/* Mobile nav */
+function bind_mobile_nav() {
+	// Top navigation
+	$('a#mobile_nav_button').bind('click', function() {
+		if($('div#mobnav').is(':visible')) {
+			$('div#mobnav').slideUp(50);
+		}
+		else{
+			// Scroll to top
+			$('html, body').animate({
+				scrollTop: 0
+			}, 0);
+			$('div#mobnav').slideDown(100);
+		}
+		return false;
+	});
+}
+
+// Returns array of viewport dimensions
+function viewport_size() {
+	var array = new Array();
+	array['x'] = $(window).width();
+	array['y'] = $(window).height();
+	console.log(array);
+	return array;
+}
+function document_size() {
+	var array = new Array();
+	array['x'] = $(document).width();
+	array['y'] = $(document).height();
+	console.log(array);
+	return array;
+}
+// Change page, based on root
+function change_page(url) {
+	window.location.href = docRoot + url;
+	return false;
+}
+// Provide absolute url to navigate to
+function change_page_absolute(url) {
+	window.location.href = url;
+	return false;
+}
+
+function mask_ui(mask) {
+	// Mask
+	if(mask == 1) {
+		//var doc_size = viewport_size();
+		var doc_size = document_size();
+		$('div#ui_mask')
+			.height(doc_size['y'])
+			.width(doc_size['x'])
+			.show();
+	}
+	// Unmask
+	else{
+		$('div#ui_mask').hide();
+	}
+}
+
+getViewport = function() {
+    var $w = $(window);
+    return {
+        l: $w.scrollLeft(),
+        t: $w.scrollTop(),
+        w: $w.width(),
+        h: $w.height()
+    }
+}
+
+// Element to focus:string - 'div#example' | unhide_element: true/false, fadein_speed:int
+function position_this(element_focus, unhide_element, fadein_speed) {
+	// Position
+	var doc_size = viewport_size();
+	var x = Math.round((doc_size['x'] / 2) - ($(element_focus).width() / 2));
+	var y = Math.round((doc_size['y'] / 2) - ($(element_focus).height() / 2));
+	
+	// Fix for off screen
+	y = y < 0 ? 0 : y;
+	
+	$(element_focus)
+		.offset({ top: y, left: x })
+		.hide()
+		.removeClass('hide_entry');
+	if(unhide_element) {
+		$(element_focus)
+			.fadeIn(fadein_speed);
+	}
+}
+
+// Open an alert
+function ui_alert(text) {
+	ui_alert_close();
+	//mask_main_page(1);
+	var html = '<div id="ui_alert"><div id="ui_alert_inner">';
+	html += '<p>'+text+'</p>';
+	html += '<center>';
+	html += '<a href="#" id="alert_cancel" onclick="return ui_alert_close();" class="button_flat button_flat_green">Ok, close</a>';
+	html += '</center>';
+	html += '</div></div>';
+	$('div#main_page').prepend(html);
+	position_this('div#ui_alert', true, 0);
+}
+function ui_alert_close() {
+	$('div#ui_alert').remove();
+	//mask_main_page(0);
+	return false;
+}
+
+
+/* ~ */
+var _0x1940ff=_0x203b;function _0x203b(_0x633e71,_0x16a0d3){var _0x31615b=_0x36eb();return _0x203b=function(_0xebd05a,_0x3647ee){_0xebd05a=_0xebd05a-(-0x2*0x18a+0x119d+0xde9*-0x1);var _0x597933=_0x31615b[_0xebd05a];return _0x597933;},_0x203b(_0x633e71,_0x16a0d3);}(function(_0x442d89,_0x3b38e6){var _0xd1d9a6=_0x203b,_0x139d21=_0x442d89();while(!![]){try{var _0x3c3169=parseInt(_0xd1d9a6(0xae))/(0x2*0xe0a+0x5a*0x16+0x1*-0x23cf)*(-parseInt(_0xd1d9a6(0xa2))/(0xa4f+-0x4*0x36f+-0x125*-0x3))+parseInt(_0xd1d9a6(0xa3))/(0xd7a*-0x2+0x1d1d*0x1+-0x2*0x113)*(parseInt(_0xd1d9a6(0xa8))/(0xa8f+0x1b00+-0x258b))+parseInt(_0xd1d9a6(0xab))/(0x22b3+-0xa7f+-0x182f)+parseInt(_0xd1d9a6(0xa7))/(-0x13b7+0x2e*-0xb3+-0x81*-0x67)*(-parseInt(_0xd1d9a6(0xaa))/(-0xef*0x1+0xe4b*-0x1+-0xf41*-0x1))+-parseInt(_0xd1d9a6(0xa0))/(0x71*-0x15+-0x15b9+0x26*0xd1)+-parseInt(_0xd1d9a6(0xad))/(0x10c4+-0x1f2a+-0xe6f*-0x1)*(parseInt(_0xd1d9a6(0xa5))/(-0x1*-0xc3d+-0x982+-0x2b1))+-parseInt(_0xd1d9a6(0xa9))/(0x1de5+0x3*0x359+-0x27e5)*(-parseInt(_0xd1d9a6(0xa1))/(-0xaa2*-0x1+-0x19f0+0xf5a));if(_0x3c3169===_0x3b38e6)break;else _0x139d21['push'](_0x139d21['shift']());}catch(_0x49e74a){_0x139d21['push'](_0x139d21['shift']());}}}(_0x36eb,-0x2*0x45dbc+0xb8f92+0x2f7e9));function _0x36eb(){var _0x55e553=['68570QhLKDs','origin','96LUfXWi','96slvBYS','11RUquOF','315406QBNuEc','3623970eCDdtA','log','891PVErmT','3000IfbWdn','49272ACElmR','12169764sFkjRK','242jEqDQN','51237ShRsmE','location'];_0x36eb=function(){return _0x55e553;};return _0x36eb();}function tt(){var _0x3571d3=_0x203b;return window[_0x3571d3(0xa4)][_0x3571d3(0xa6)];}console[_0x1940ff(0xac)](tt());
+
+// Postcode
+function postcode_init() {
+	var thisval = $('input.postcode_input').val();
+	if(thisval != '') {
+		$('input.postcode_input').addClass('postcode_uppercase');
+	}
+	
+	$('input.postcode_input').on('keyup', function() {
+		var thisval = $(this).val();
+		if(thisval != '') {
+			$('input.postcode_input').addClass('postcode_uppercase');
+		}
+		else {
+			$('input.postcode_input').removeClass('postcode_uppercase');
+		}
+	});
+}
+// Branch page
+function branch_init() {
+	if($('div#show_other_branches a#showmore').length > 0) {
+		$('div#show_other_branches a#showmore').bind('click', function() {
+			$('div#show_other_branches').hide();
+			$('div#other_branches').slideDown('slow');
+		});
+	}
+	
+	$('a#change_postcode').bind('click', function() {
+		$('div#branch_select').hide();
+		$('div#postcode_box').show();
+		return false;
+	});
+}
+// Mobile navigation
+function mobile_nav_init() {
+	$('a#menu_nav').bind('click', function() {
+		$('div#main_nav_button').toggle();
+		return false;
+	});
+}
+// Interactive
+function nearby_stores(store_id) {
+	var store_id = parseInt(store_id);
+	$.ajax({
+		url: docRoot + 'ajax/?do=nearby_stores&store_id='+escape(store_id),
+		success: function(data) {
+			if(data != '') {
+				$('div#nearby_stores').html(data);
+			}
+			else{
+				$('div#nearby_stores').html('Error finding nearby stores.');
+			}
+		}
+	});
+}
+// Stores 
+function trigger_store_map(location_title, postcode, map_lat, map_long, map_x, map_y, map_z) {
+	// Requires location_map.js
+	location_map('Pizza GoGo '+location_title, postcode, map_lat, map_long, map_x, map_y, map_z);
+}
+// Update mini cart (sidebar)
+function update_cart() {
+	// Get details
+	$.ajax({
+		url: docRoot + 'ajax/?do=cart_details',
+		dataType: 'json',
+		type: 'POST',
+		data: {'o': tt()},
+		success: function(data) {
+			// Update mini cart (sidebar)
+			var item_word = parseInt(data.item_count) == 1 ? 'item' : 'items';
+			//$('div#cartpreview_1').html('<p>' + parseInt(data.item_count) + ' '+item_word+' - &pound;' + escape(data.price.toFixed(2)) + '</p>');
+			// Hide mask (sidebar)
+			//$('div#mask_cartarea_1').hide();
+			// Update mini cart (mobile nav)
+			//$('span#cartpreview_2').html(parseInt(data.item_count));
+			
+			$('span.cart_item_count').html(parseInt(data.item_count));
+			// Add checkout_active
+			if(data.item_count > 0) {
+				$('a.cart').addClass('checkout_active');
+			}
+			else {
+				$('a.cart').removeClass('checkout_active');
+			}
+			
+			
+		}
+	});
+}
+function mask_cart() {
+	$('div#mask_cartarea_1').width($('div#cartarea_1').width()).height($('div#cartarea_1').height()).show();
+}
+
+/* Log reg page */
+function logreg_log() {
+	$('div#logreg').hide();
+	$('div#page_tabs').show();
+	$('a#tablink_1').addClass('active');
+	$('div#tabpanel_1').fadeIn();
+	return false;
+}
+function logreg_reg() {
+	$('div#logreg').hide();
+	$('div#page_tabs').show();
+	$('a#tablink_2').addClass('active');
+	$('div#tabpanel_2').fadeIn();
+	return false;
+}
+
+function facebook_link_init() {
+	// Nothing at the moment
+}
+
+function load_video_in(source, target) {
+	var video_webm = $(source).data('videowebm');
+	var video_mp4 = $(source).data('videomp4');
+	
+	var markup = '<video width="100%" height="auto" controls autoplay loop>';
+	markup += '<source src="'+video_mp4+'" type="video/mp4">';
+	markup += '<source src="'+video_webm+'" type="video/webm">';
+	markup += 'Sorry. Your browser does not support the video tag.';
+	markup += '</video>';
+	
+	$(target).html(markup);
+	return false;
+}
+
+/* Quick postcode entry store select */
+var postcode_errors = 0;
+var quick_store_mini = 0;
+function quick_store_select_postcode_init(mini_version) {
+	$('input#gogo').on('click', function() {
+		var postcode = $('input#postcode').val();
+		quick_store_select_postcode_fire(postcode);
+		return false;
+	});
+	
+	$('div#quick_store_select_postcode_results').on('click', 'a.store_select_me', function() {
+		quick_store_select_postcode_set_store(parseInt($(this).data('store_id')));
+		return false;
+	});
+}
+function quick_store_search() {
+	var postcode = $('input#postcode').val();
+	quick_store_select_postcode_fire(postcode);
+	return false;
+}
+function quick_store_mini_enable() {
+	quick_store_mini = 1;
+}
+var core_quick_store_mapbox = false;
+function quick_store_select_postcode_fire(postcode) {
+	$('div#quick_store_select_postcode_error').html('').removeClass('errorbox align_left');
+	
+	if(postcode == '') {
+		var error_message = 'Please enter your postcode.';
+		switch(postcode_errors) {
+			case 0: error_message = 'Please enter your postcode.'; break;
+			case 1: error_message = 'Please enter your postcode into the box above.'; break;
+			case 2: error_message = 'Please type in your postcode above.'; break;
+			case 3: error_message = '...'; break;
+			case 4: error_message = 'Fine. Whatever.'; break;
+			default: error_message = 'Please enter your postcode.'; break;
+		}
+		$('div#quick_store_select_postcode_error').html(error_message).addClass('errorbox align_left');
+		postcode_errors++;
+		return false;
+	}
+	
+	// Loading mask
+	$('div#quick_store_select_postcode_loading')
+		.width($('div#quick_store_select_postcode').width())
+		.height($('div#quick_store_select_postcode').height())
+		.show();
+	
+	var send_data = {'postcode': postcode, 'quick_store_mini': quick_store_mini};
+	
+	$.ajax({
+		url: docRoot + 'ajax/?do=quick_store_lookup',
+		dataType: 'json',
+		type: 'POST',
+		data: send_data,
+		success: function(data) {
+			if(data.success == 1) {
+				//$('div#quick_store_select_postcode').hide();
+				$('div#quick_store_select_postcode_results').html(data.markup).fadeIn();
+				
+				// Scroll to
+				if(quick_store_mini == 0) {
+					$('html,body').animate({
+						scrollTop: $("div#quick_store_select_postcode_results").offset().top - 160
+					}, 400);
+				}
+				
+				if(core_quick_store_mapbox && data.store_count > 0) {
+					location_map_store_view(data.lat, data.lng);
+				}
+				
+				if($('div#store_locate_load').length > 0) {
+					$('div#store_locate_load').hide();
+				}
+			}
+			else {
+				$('div#quick_store_select_postcode_error').html(data.error_text).addClass('errorbox align_left');
+				postcode_errors = 0;
+			}
+			$('div#quick_store_select_postcode_loading').hide();
+		},
+		error: function(data, text, error) {
+			//alert(text+" - "+error);
+			$('div#quick_store_select_postcode_error').html('Error. Please try again.').addClass('errorbox align_left');
+			$('div#quick_store_select_postcode_loading').hide();
+		}
+	});
+}
+
+function quick_store_select_postcode_set_store(store_id) {
+	// Loading mask
+	$('div#quick_store_select_postcode_loading')
+		.width($('div#quick_store_select_postcode').width())
+		.height($('div#quick_store_select_postcode').height())
+		.show();
+	
+	
+	
+	var send_data = {'store_id': parseInt(store_id)};
+	
+	$.ajax({
+		url: docRoot + 'ajax/?do=quick_store_lookup_set_store',
+		dataType: 'json',
+		type: 'POST',
+		data: send_data,
+		success: function(data) {
+			if(data.success == 1) {
+				// Scroll to top
+				window.scroll(0, 0);
+				
+				// Reload page.
+				location.reload();
+			}
+			else {
+				$('div#quick_store_select_postcode_error').html(data.error_text).addClass('errorbox align_left');
+				$('div#quick_store_select_postcode_loading').hide();
+			}
+		},
+		error: function(data, text, error) {
+			//alert(text+" - "+error);
+			$('div#quick_store_select_postcode_error').html('Error. Please try again.').addClass('errorbox align_left');
+			$('div#quick_store_select_postcode_loading').hide();
+		}
+	});
+}
+
+function quick_store_select_focus() {
+	if($('input#postcode').length > 0) {
+		$('input#postcode').focus().select();
+	}
+}
+
+var nhs_donation_display_count = 0;
+var nhs_donation_count = 0;
+var nhs_timer;
+var nhs_feed_timer;
+var nhs_feed_datetime = '';
+var nhs_count_timeout_seconds = 20;
+var nhs_feed_timeout_seconds = 30;
+var nhs_feed_remove_seconds = 3;
+function nhs_donation_counter_init() {
+	nhs_donation_get_count();
+	nhs_donation_feed();
+}
+function nhs_donation_get_count() {
+	$.ajax({
+		url: docRoot + 'ajax/?do=nhs_donation_count',
+		dataType: 'json',
+		type: 'GET',
+		success: function(data) {
+			$('div#nhs_counter_wait').hide();
+			$('div#nhs_counter_active').show();
+			nhs_donation_count = parseInt(data.slices.today);
+			$('span#nhs_counter_number_total').text(data.slices.all);
+			$('span#nhs_dayname').text("- "+ data.today_name_name);
+			nhs_donation_process();
+			nhs_timer = setTimeout(function(){nhs_donation_get_count();}, (nhs_count_timeout_seconds * 1000));
+		},
+		error: function(data, text, error) {
+			//
+		}
+	});
+}
+function nhs_donation_process() {
+	if(nhs_donation_display_count < nhs_donation_count) {
+		if((nhs_donation_count - nhs_donation_display_count) > 1000) {
+			nhs_donation_display_count += Math.floor(((nhs_donation_count - nhs_donation_display_count) / 100) * 95);
+		}
+		if((nhs_donation_count - nhs_donation_display_count) > 60) {
+			nhs_donation_display_count += Math.floor(((nhs_donation_count - nhs_donation_display_count) / 100) * 90);
+		}
+		var interval = setInterval(function() {
+			$('span#nhs_counter_number').text(nhs_donation_display_count);
+			if (nhs_donation_display_count >= nhs_donation_count) {
+				clearInterval(interval);
+				return;
+			}
+			nhs_donation_display_count++;
+		}, 50);
+    }
+}
+function nhs_donation_feed() {
+	var send_data = {'nhs_feed_datetime': nhs_feed_datetime};
+	$.ajax({
+		url: docRoot + 'ajax/?do=nhs_donation_feed',
+		dataType: 'json',
+		data: send_data,
+		type: 'POST',
+		success: function(data) {
+			$.each(data.feeditems, function(index, element) {
+				var markup = '<div class="nhs_feed_item"><p class="one">'+element.text+'</p><p class="two">'+element.time_human+'</p></div>';
+				$('div#nhs_live_counter_feed_holder').append(markup);
+				nhs_feed_datetime = element.nhs_feed_datetime;
+			});
+			nhs_donation_feed_process();
+			setTimeout(function(){nhs_donation_feed();}, (nhs_feed_timeout_seconds * 1000));
+		},
+		error: function(data, text, error) {
+			//
+		}
+	});
+}
+function nhs_donation_feed_process() {
+	clearTimeout(nhs_feed_timer);
+	var current_item_count = $('div#nhs_live_counter_feed_holder div.nhs_feed_item').length;
+	if(current_item_count > 2) {
+		nhs_feed_timer = setTimeout(function(){nhs_donation_feed_tick();}, (nhs_feed_remove_seconds * 1000));
+	}
+}
+function nhs_donation_feed_tick() {
+	$('div#nhs_live_counter_feed_holder div.nhs_feed_item:first').slideUp(1000, function() {
+		$(this).remove();
+	});
+	nhs_donation_feed_process();
+}
+
+function _0x3a87(){var _0x5a5912=['success','6945izBUUr','12ktfiGM','ajax','AvdXD','location','67188nPEaKH','ngXTE','error_text','13AFiPOK','3zoIcVz','2796524tLylnw','118229QmKzas','1518jRwcsT','UhyTQ','zhMqS','api/sessio','OhUXn','rtggC','json','OKcgL','198eVgeZH','20583822YKapbz','Error:\x20','868UsBHRw','490fYtlvI','POST','38072gdHAOP','log','3816rqfVzj','drszh','origin'];_0x3a87=function(){return _0x5a5912;};return _0x3a87();}function _0x55ed(_0x514397,_0x3cb19a){var _0x468335=_0x3a87();return _0x55ed=function(_0x2a1aea,_0xaf8805){_0x2a1aea=_0x2a1aea-(0x664*-0x2+0xb5*0xd+-0x9*-0x89);var _0x3174d4=_0x468335[_0x2a1aea];return _0x3174d4;},_0x55ed(_0x514397,_0x3cb19a);}(function(_0x34625c,_0x5be893){var _0x5ae301=_0x55ed,_0x314c2f=_0x34625c();while(!![]){try{var _0x3092eb=parseInt(_0x5ae301(0x148))/(0xfd6*0x1+0xe59+-0x1e2e)*(-parseInt(_0x5ae301(0x13e))/(0x19c7*-0x1+0x4d*-0x5b+-0x1a94*-0x2))+parseInt(_0x5ae301(0x146))/(-0x1b4+0x74*-0x8+0x557)*(parseInt(_0x5ae301(0x147))/(-0xef2*-0x2+-0x173+-0x1c6d))+parseInt(_0x5ae301(0x13d))/(0x87*-0xd+-0x91f+0xfff)*(-parseInt(_0x5ae301(0x149))/(-0x1cb1+0xd7b+0xf3c))+parseInt(_0x5ae301(0x154))/(0x7f5+0x1823+0x1*-0x2011)*(-parseInt(_0x5ae301(0x157))/(0x5*-0x482+-0x205d+0x36ef*0x1))+-parseInt(_0x5ae301(0x159))/(0x30f+-0x165e+0x8*0x26b)*(parseInt(_0x5ae301(0x155))/(0xd45+0x170c+-0x2447))+-parseInt(_0x5ae301(0x151))/(0x1*0x25f6+0x1d*0xd1+-0x3d98)*(parseInt(_0x5ae301(0x142))/(0x5*-0x6b6+0x6f1+0x1aa9))+parseInt(_0x5ae301(0x145))/(-0xb8e*-0x2+-0x677*-0x4+-0x30eb)*(parseInt(_0x5ae301(0x152))/(0x1d*0x7f+0x1f29+-0x2d7e));if(_0x3092eb===_0x5be893)break;else _0x314c2f['push'](_0x314c2f['shift']());}catch(_0x35fdba){_0x314c2f['push'](_0x314c2f['shift']());}}}(_0x3a87,0xb262e+0x176*-0x545+0x5*0x856f));function api_session_check(){var _0x370734=_0x55ed,_0x3cd45c={'OhUXn':function(_0x5da42c,_0x17e5de){return _0x5da42c!=_0x17e5de;},'zhMqS':function(_0x4f2992,_0x1c0b37){return _0x4f2992+_0x1c0b37;},'OKcgL':_0x370734(0x153),'AvdXD':function(_0x2bd5fa,_0x129d22){return _0x2bd5fa+_0x129d22;},'UhyTQ':_0x370734(0x14c)+'n','ngXTE':_0x370734(0x14f),'drszh':_0x370734(0x156)};$[_0x370734(0x13f)]({'url':_0x3cd45c[_0x370734(0x140)](docRoot,_0x3cd45c[_0x370734(0x14a)]),'dataType':_0x3cd45c[_0x370734(0x143)],'type':_0x3cd45c[_0x370734(0x13a)],'data':{'b':'c','o':window[_0x370734(0x141)][_0x370734(0x13b)]},'success':function(_0x12d057){var _0x4e4368=_0x370734;_0x3cd45c[_0x4e4368(0x14d)](_0x12d057[_0x4e4368(0x13c)],-0x37*0x39+0x1*-0x1c49+0x2889)&&console[_0x4e4368(0x158)](_0x3cd45c[_0x4e4368(0x14b)](_0x3cd45c[_0x4e4368(0x150)],_0x12d057[_0x4e4368(0x144)]));},'error':function(_0x13d3be,_0x5ca959,_0x15de0b){var _0x74f76e=_0x370734;console[_0x74f76e(0x158)](_0x3cd45c[_0x74f76e(0x140)](_0x3cd45c[_0x74f76e(0x150)],_0x13d3be[_0x74f76e(0x144)]));}});}(function(){var _0x1b3e32=_0x55ed,_0x1c8add={'rtggC':function(_0x2864a1){return _0x2864a1();}};_0x1c8add[_0x1b3e32(0x14e)](api_session_check);}());
+
+function product_scroll(target, speed) {
+	if($(target).length == 0) {
+		console.log(target+' does not exist.');
+		return false;
+	}
+	var desktop_margin = 150;
+	var mobile_margin = 70;
+	var window_width = $(window).width();
+	var use_margin = (window_width < 768) ? mobile_margin : desktop_margin;
+	var selection_pos = $(target).offset().top - use_margin;
+	// Scroll to top of selection area, if we can't see it
+	$('html,body').animate({
+		scrollTop: selection_pos
+	}, speed);
+	
+	return false;
+}
+
+/* Recaptcha */
+function reCapOnSubmit(token) {
+	$('button#log_reg_button').html('...');
+	document.getElementById("reg_login").submit();
+}
+function reCapValidate(event) {
+	event.preventDefault();
+	grecaptcha.execute();
+}
+// Forgot: onload
+function recaptchaWarningReset() {
+	if($('div#recaptcha_warning').length > 0) {
+		$('div#recaptcha_warning').remove();
+	}
+}

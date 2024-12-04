@@ -1,0 +1,1615 @@
+/* Pizza GoGo Menu Pages | Author: Mark Willis */
+// Temp defaults for your UI. We check again in the cart.
+// Changing values here will only affect your display - not your cart.
+var max_toppings = 12;
+var max_quantity = 15;
+var available_toppings = 0;
+function update_max_toppings(new_value) {max_toppings = new_value;}
+function update_max_quantity(new_value) {max_quantity = new_value;}
+// Temp price store: UI Pricing only.
+var temp_start_price = 0; // in pence (static) initial start price, updated on first load
+var temp_add_price = 0; // in pence (variable) running total of extra costs
+var temp_curr_add_price = 0; // in pence (variable) per product add price (added to temp_add_price on finalise)
+var temp_half_1_price = 0; // in pence (variable) holds price of first half (also used by bogof_special)
+var temp_half_2_price = 0; // in pence (variable) holds price of second half (also used by bogof_special)
+var temp_pizza_size = 0;
+var temp_pizza_base = 0;
+var temp_stuffed_base = 0;
+// If you 'hack' removed_toppings, your pizza will be converted into a free choice anyway.
+var base_toppings = new Array();
+var removed_toppings = 0;
+
+function pizza_init() {
+	if($('a#customise_toppings_link').length > 0) {
+		var hash = window.location.hash;
+		if(hash != '') {
+			var parts = hash.split('#');
+			parts = parts[1].split('_');
+			// Update pizza size
+			$('select#pizza_size').val(parts[0]);
+			shop_update_size(parts[0]);
+			// Update pizza base
+			$('select#pizza_base').val(parts[1]);
+			shop_update_base(parts[1]);
+			// Update stuffing
+			$('select#stuffed_base').val(parts[2]);
+			// Update quantity
+			$('input#quantity').val(parts[3]);
+			check_quantity();
+			update_price();
+		}
+	}
+}
+function update_pizza_url() {
+	if($('a#customise_toppings_link').length > 0) {
+		var p0 = $('select#pizza_size').val();
+		var p1 = $('select#pizza_base').val();
+		var p2 = $('select#stuffed_base').val();
+		var p3 = $('input#quantity').val();
+		var current_url = $('a#customise_toppings_link').attr('href').split('#');
+		var new_url = current_url[0] + '#' + p0 + '_' + p1 + '_' + p2 + '_' + p3;
+		$('a#customise_toppings_link').attr('href', new_url);
+	}
+}
+function get_start_price() {
+	// Get size_id
+	if($('select#pizza_size').length > 0) {
+		var size_id = $('select#pizza_size').val();
+	}
+	else {
+		var size_id = 0;
+	}
+	// Get start price for size_id
+	var start_price = $('input#price_'+size_id).val();
+	return start_price;
+}
+// Sync filter data
+function filters_init() {
+	$('select#pizzafilter').change(function() {
+		if($(this).val() > 0) {trigger_filters(filters[$(this).val()]);}else{$('div.product_item').fadeIn();}
+		/*
+		$('html,body').animate({
+		scrollTop: $("select#pizzafilter").offset().top
+		}, 600);
+		*/
+		return false;
+	});
+}
+function trigger_filters(product_string) {
+	var products = product_string.split('|');
+	$('div.product_item').hide();
+	$('div.product_item').each(function() {
+		var thisid = $(this).attr('id').split('_');
+		for(var i = 0; i < products.length; i++) {
+			if(products[i] == thisid[1]) {
+				// In array, show
+				$('div#product_'+thisid[1]).fadeIn('slow');
+			}
+		}
+	});
+}
+// Product popover
+function bind_products() {
+	// Add MAC close button gogogo
+	hs.registerOverlay({
+		html: '<div class="closebutton" onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		useOnHtml: true,
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+	
+	// Open popover
+	$('div.product_item a.menu_link').bind('click', function() {
+		var doc_height = $(window).height();
+		var doc_width = $(window).width() - 50;
+		
+		// Deny this on mobile
+		if(doc_width < 400) {
+			return true;
+		}
+		
+		// Disable popover?
+		if($('input#disable_popover').length > 0) {
+			var disable_popover = parseInt($('input#disable_popover').val());
+			if(disable_popover == 1) {
+				return true;
+			}
+		}
+		
+		// Override
+		doc_height = 470;
+		
+		if(doc_width > 900) {
+			doc_width = 700;
+		}
+		
+		// Set product ID
+		var thisid = $(this).attr('id').split('_');
+		var product_id = thisid[1];
+		
+		// Open Wrapper Picker
+		hs.overrides.push('onAfterExpand');
+		hs.htmlExpand(null, {
+			objectType: 'ajax',
+			src: docRoot + 'ajax/?do=product_pop&product_id='+escape(product_id),
+			width: doc_width,
+			height: doc_height,
+			wrapperClassName: 'no-footer no-move custom-header no-header',
+			dimmingOpacity: 0.30,
+			preserveContent: false,
+			onAfterExpand: function(expander) {
+				// After it has expanded..
+				bind_shop_selections();
+				
+				// Hide image if mobile
+				if(doc_width < 400) {
+					$('div#product_right').hide();
+					$('div#product_desc_area').hide();
+				}
+			}
+		});
+		return false;
+	});
+	// Bind cancel button
+	$('a.cancel_window').live('click', function() {
+		hs.close();
+	});
+	
+	bind_larger_images();
+	
+	$('div#products').on('click', 'a.allergen_nutritional_info', function() {
+		// Set product ID
+		var product_id = parseInt($(this).data('product_id'));
+		
+		var doc_width = 320;
+		var doc_height = 200;
+		
+		// Open Wrapper Picker
+		hs.overrides.push('onAfterExpand');
+		hs.htmlExpand(null, {
+			objectType: 'ajax',
+			src: docRoot + 'ajax/?do=product_nutritional&product_id='+escape(product_id),
+			width: doc_width,
+			height: doc_height,
+			wrapperClassName: 'no-footer no-move custom-header no-header',
+			dimmingOpacity: 0.30,
+			preserveContent: false,
+			onAfterExpand: function(expander) {
+				
+			}
+		});
+		return false;
+	});
+}
+function bind_larger_images() {
+	$('a.enlarge_image').live('click', function() {
+		hs.expand(this);
+		return false;
+	});
+}
+
+/*
+	Products: PIZZA PAGE
+*/
+
+function process_toppings_from_product_info(toppings) {
+	$('div.option_select_small').each(function(index) {
+		var thisid = $(this).find('input.clickybox_val').attr('id').split('_');
+		var toppingid = thisid[1];
+		var on_pizza = toppings[toppingid].on_pizza;
+		$(this).find('input.clickybox_val').val(on_pizza);
+	});
+}
+
+function process_toppings_active() {
+	$('div#custom_toppings div.option_select_small').each(function(index) {
+		var on_pizza = $(this).find('input.clickybox_val').val();
+		var toppings = 0;
+		var thisid = $(this).find('input.clickybox_val').attr('id').split('_');
+		var ingredient_id = thisid[1];
+		
+		$(this).removeClass('option_selected');
+		$(this).removeClass('option_selected_twice');
+		
+		if(on_pizza == 1) {
+			$(this).addClass('option_selected');
+			toppings = toppings + 1;
+		}
+		else if(on_pizza == 2) {
+			$(this).addClass('option_selected_twice');
+			toppings = toppings + 2;
+		}
+		
+		// Set base toppings
+		base_toppings[parseInt(ingredient_id)] = parseInt(on_pizza);
+		//console.log('Setting '+ingredient_id + ' to '+on_pizza);
+		
+		$('input#toppings').val(parseInt(toppings));
+	});
+	//console.log(base_toppings);
+	
+	// Reset removed toppings count to 0
+	removed_toppings = 0;
+	
+	// Add MAC close button gogogo
+	hs.registerOverlay({
+		html: '<div class="closebutton" onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		useOnHtml: true,
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+}
+var toppings_bound = false;
+function bind_custom_toppings() {
+	if($('div.option_select_small').length > 0) {
+		// Process toppings
+		process_toppings_active();
+		
+		if(toppings_bound === false) {
+			$('div#custom_toppings div.option_select_small a.clickybox').live('click', function(event) {
+				event.preventDefault();
+				var clickybox_val = $(this).closest('div.option_select_small').find('input.clickybox_val');
+				// How many toppings of this type on pizza
+				var on_pizza = clickybox_val.val();
+				var clicky_id = clickybox_val.attr('id').split('_');
+				var ingredient_id = clicky_id[1];
+				
+				// Base sauce control
+				if(on_pizza == 0) {
+					// None on yet, so we might be changing sauce!
+					if($(this).data('catkey') == 1) {
+						// Stop stacking of base sauce
+						$('div#custom_toppings div.option_select_small a.clickybox').each(function(index) {
+							if($(this).data('catkey') == 1) {
+								var curr_val = $(this).closest('div.option_select_small').find('input.clickybox_val').val();
+								var curr_id = $(this).closest('div.option_select_small').find('input.clickybox_val').attr('id').split('_');
+								var curr_ingredient_id = curr_id[1];
+								if(curr_val > 0 && base_toppings[curr_ingredient_id] > 0) {
+									// Remove one
+									removed_toppings = removed_toppings + 1;
+									//console.log('Removed one due to base');
+								}
+								$(this).closest('div.option_select_small').find('input.clickybox_val').val(0);
+								$(this).closest('div.option_select_small').removeClass('option_selected').removeClass('option_selected_twice');
+							}
+						});
+					}
+				}
+				
+				// Get current toppings
+				var toppings = $('input#toppings').val();
+				
+				// Limits the amount of toppings added
+				if(toppings >= parseInt(max_toppings) && on_pizza < 2) {
+					
+					// Set current to 0.
+					if(base_toppings[ingredient_id] == 0) {
+						alert("You have reached the maximum of "+parseInt(max_toppings)+" toppings (including cheese and sauce).");
+						
+						if(on_pizza == 1) {
+							$(this).closest('div.option_select_small').find('input.clickybox_val').val(0);
+							$(this).closest('div.option_select_small').removeClass('option_selected');
+						}
+						else if(on_pizza == 2) {
+							$(this).closest('div.option_select_small').find('input.clickybox_val').val(0);
+							$(this).closest('div.option_select_small').removeClass('option_selected_twice');
+						}
+					}
+					else {
+						alert("You have reached the maximum of "+parseInt(max_toppings)+" toppings (including cheese and sauce). \n\nTip: Please click on an additional topping again to remove it.");
+					}
+					
+					// Add up toppings
+					update_toppings_count();
+					
+					// Calc pricing
+					update_price();
+					return false;
+				}
+				
+				if(on_pizza == 0) {
+					$(this).closest('div.option_select_small').find('input.clickybox_val').val(1);
+					$(this).closest('div.option_select_small').addClass('option_selected');
+					if(base_toppings[ingredient_id] > 0) {
+						removed_toppings = removed_toppings - 1;
+						//console.log('Removed (updated): ' + removed_toppings);
+					}
+				}else if(on_pizza == 1) {
+					$(this).closest('div.option_select_small').find('input.clickybox_val').val(2);
+					$(this).closest('div.option_select_small').removeClass('option_selected');
+					$(this).closest('div.option_select_small').addClass('option_selected_twice');
+				}
+				else if(on_pizza == 2) {
+					// If you hack this UI, you will find your pizza gets automatically changed to a free choice anyway.
+					var removeok = 1;
+					if(base_toppings[ingredient_id] > 0) {
+						removed_toppings = removed_toppings + 1;
+						//console.log('Removed: ' + removed_toppings);
+						if(removed_toppings > 2) {
+							too_many_toppings_removed();
+							removeok = 0;
+							removed_toppings = removed_toppings - 1;
+							//console.log('Removed (updated): ' + removed_toppings);
+						}
+					}
+					if(removeok == 1) {
+						$(this).closest('div.option_select_small').find('input.clickybox_val').val(0);
+						$(this).closest('div.option_select_small').removeClass('option_selected_twice');
+					}
+				}
+				
+				// The following two functions require a certain amount of processing of browser.
+				// Slow mobiles will suffer.
+				
+				// Add up toppings (chugs++)
+				update_toppings_count();
+				
+				// Calc pricing
+				update_price();
+				
+				// NutritionalAllergens2022
+				menu_nutritional_calc();
+				
+				return false;
+			});
+			toppings_bound = true;
+		}
+		
+		// Set price of toppings
+		get_topping_price();
+		
+		// Add up toppings
+		update_toppings_count();
+		
+		// Calc pricing
+		update_price();
+	}
+}
+
+// Count toppings and report back to user what's selected.
+function update_toppings_count() {
+	var toppings = 0;
+	var toppings_selected = '';
+	$('input.clickybox_val').each(function(index) {
+		var thisval = parseInt($(this).val());
+		toppings = parseInt(toppings) + thisval;
+		var ing_name = $(this).attr('title');
+		if(thisval > 0) {
+			var toppings_count = thisval > 1 ? ' (x'+thisval+')' : '';
+			toppings_selected += ing_name + toppings_count + ', ';
+		}
+	});
+	if(toppings_selected == '') {
+		toppings_selected = 'Nothing. Just a plain base...';
+	}
+	else{
+		// Remove final comma
+		toppings_selected = toppings_selected.substr(0, (parseInt(toppings_selected.length) - 2));
+	}
+	
+	$('input#toppings').val(toppings);
+	$('div#toppings_selected').html(toppings_selected);
+}
+
+// Process cost of toppings selected
+function calculate_toppings_cost() {
+	var toppings_allowed = parseInt($('input#toppings_allowed').val());
+	var toppings = parseInt($('input#toppings').val());
+	
+	var extra_toppings = parseInt(toppings - toppings_allowed);
+	if(extra_toppings <= 0) {
+		extra_toppings = 0;
+	}
+	
+	var start_price = (get_start_price() * 100);
+	var topping_price = (get_topping_price() * 100);
+	
+	var toppings_cost = (extra_toppings * topping_price) / 100;
+	
+	if(toppings < toppings_allowed) {
+		var allowed = toppings_allowed - toppings;
+		var term = allowed == 1 ? 'topping' : 'toppings';
+		var toppings_info = 'You may choose <span class="toppings_green">' + allowed + '</span> additional ' + term + ' for free. <span class="toppings_green">+&pound;0.00</span>';
+	}
+	else{
+		var term = extra_toppings == 1 ? 'topping' : 'toppings';
+		if(extra_toppings == 0) {
+			extra_toppings = 'No';
+			var toppings_info = extra_toppings + ' additional ' + term + ' selected. <span class="toppings_green">+&pound;0.00</span>';
+		}
+		else{
+			var display_cost = toppings_cost.toFixed(2);
+			var toppings_info = '<span class="toppings_red">' + extra_toppings + '</span> additional ' + term + ' selected. <span class="toppings_red">+&pound;'+display_cost+'</span>';
+		}
+		
+	}
+	$('span#toppings_allowed').html(toppings_info);
+	
+	// Set available toppings
+	available_toppings = (toppings_allowed - toppings);
+	
+	// Return 
+	return toppings_cost;
+}
+
+// Show customise UI
+function customise_toppings() {
+	if($('input#static_page').length > 0) {
+		// We're on static page
+		if($('div#custom_toppings').is(':visible')) {
+			// Hide toppings
+			//$('div#custom_toppings').fadeOut();
+			
+			// Show add button if it exists.
+			//if($('div#add_button_one').length > 0) {
+			//	$('div#add_button_one').show();
+			//}
+			
+			$('div#product_desc_area').hide();
+			
+			// Scroll to custom_toppings
+			/*
+			$('html,body').animate({
+				scrollTop: ($("div#custom_toppings").offset().top - 300)
+			}, 500);
+			*/
+			
+			product_scroll("div#custom_toppings_marker", 500);
+		}
+		else{
+			$('div#custom_toppings').fadeIn();
+			// Show toppings
+			
+			// Hide add button if it exists.
+			if($('div#add_button_one').length > 0) {
+				$('div#add_button_one').hide();
+			}
+			
+			$('div#product_desc_area').hide();
+			
+			// Scroll to custom_toppings
+			/*
+			$('html,body').animate({
+				scrollTop: ($("div#custom_toppings").offset().top - 300)
+			}, 500);
+			*/
+			
+			product_scroll("div#custom_toppings_marker", 500);
+		}
+		return false;
+	}
+	else{
+		// Popover, send to product page
+		return true;
+	}
+}
+
+/*
+	Products: Pricing
+*/
+function update_price() {
+	var ignore_costing = 0;
+	var special_id = 0;
+	if($('input#ignore_costing').length > 0) {
+		ignore_costing = parseInt($('input#ignore_costing').val());
+	}
+	if($('input#special_id').length > 0) {
+		special_id = 1;
+	}
+	
+	// Do we not ignore? This is for regular product processing and half_half
+	if(ignore_costing == 0) {
+		// Make sure we're on a priceable UI
+		if($('span#cost').length > 0) {
+			var stage = $('input#stage').val();
+			var price = get_start_price();
+			var start_price = price * 100;
+			
+			// Check for special_id
+			var special_product_id = 0;
+			if($('input#special_id').length > 0) {
+				var special_product_id = $('input#special_id').val();
+			}
+			
+			// Are we on half_half UI?
+			if(special_product_id == 714) {
+				if(stage < 2) {
+					temp_half_1_price = start_price;
+					// Store selections
+					temp_pizza_size = $('select#pizza_size').val();
+					temp_pizza_base = $('select#pizza_base').val();
+					temp_stuffed_base = $('select#stuffed_base').val();
+				}
+				else{
+					temp_half_2_price = start_price;
+					// Reload selections
+					$('select#pizza_size').val(temp_pizza_size);
+					$('select#pizza_base').val(temp_pizza_base);
+					$('select#stuffed_base').val(temp_stuffed_base);
+				}
+				
+				if(temp_half_1_price > temp_half_2_price) {
+					start_price = temp_half_1_price + temp_add_price;
+				}
+				else {
+					start_price = temp_half_2_price + temp_add_price;
+				}
+			}
+			
+			var quantity = parseInt($('input#quantity').val());
+			
+			// Base price
+			var add_price = 0;
+			if($('select#pizza_base').length > 0) {
+				// Stuffed base
+				var base_id = $('select#pizza_base').val();
+				if(base_id == 3) {
+					add_price = (get_stuffing_price() * 100) * quantity;
+				}	
+			}
+			
+			// Calc price
+			var new_price = ((start_price * quantity) + add_price);
+			
+			// Toppings price
+			if($('input#toppings_allowed').length > 0) {
+				// Calc toppings cost
+				var toppings_cost = calculate_toppings_cost() * 100;
+				new_price = new_price + (toppings_cost * quantity);
+				temp_curr_add_price = toppings_cost;
+			}
+			
+			// Finalise
+			new_price = new_price / 100;
+			var display_cost = new_price.toFixed(2);
+			$('span#cost').html(display_cost);
+			
+			// Update pizza url (if a pizza page)
+			update_pizza_url();
+		}
+	}
+	// This is for specials, where we ignore the costs
+	else{
+		// We're ignoring the costing, but...
+		// if special, we still look for extras
+		if(special_id == 1) {
+			// Check for special_id
+			var special_product_id = 0;
+			if($('input#special_id').length > 0) {
+				var special_product_id = $('input#special_id').val();
+			}
+			
+			// Init the prices
+			var start_price = $('span#cost').html() * 100;
+			var quantity = parseInt($('input#quantity').val());
+			
+			var stage = $('input#stage').val();
+			
+			// If we are ignoring pricing, do not get the updated cost
+			if(ignore_costing == 1) {
+				var price = $('span#cost').html();
+			}
+			else {
+				var price = get_start_price();
+			}
+			
+			// Override - if we are on bogof_special we want to price it anyway
+			if(special_product_id == 894) {
+				var price = get_start_price();
+			}
+			
+			var start_price = price * 100;
+			
+			// Run this once...
+			if(temp_start_price == 0) {
+				temp_start_price = start_price;
+			}
+			
+			// Are we on bogof_special ?
+			if(special_product_id == 894) {
+				
+				temp_start_price = start_price;
+				
+				// Base price
+				var add_price = 0;
+				if($('select#pizza_base').length > 0) {
+					// Stuffed base
+					var base_id = $('select#pizza_base').val();
+					if(base_id == 3) {
+						add_price = (get_stuffing_price() * 100) * quantity;
+					}	
+				}
+				
+				// Calc price
+				var curr_add_price = add_price;
+				
+				// Toppings price
+				if($('input#toppings_allowed').length > 0) {
+					// Calc toppings cost
+					var toppings_cost = calculate_toppings_cost() * 100;
+					curr_add_price = curr_add_price + (toppings_cost * quantity);
+				}
+				
+				// Finalise before bogof tests
+				var final_price = temp_start_price + temp_add_price + curr_add_price;
+				
+				if(stage < 2) {
+					temp_half_1_price = final_price;
+				}
+				else{
+					temp_half_2_price = final_price;
+				}
+				
+				if(temp_half_1_price > temp_half_2_price) {
+					final_price = temp_half_1_price;
+				}
+				else {
+					final_price = temp_half_2_price;
+					
+				}
+				
+				// Finalise
+				var display_cost = (final_price / 100).toFixed(2);
+				$('span#cost').html(display_cost);
+				
+				return true;
+			}
+			
+			// Base price
+			var add_price = 0;
+			if($('select#pizza_base').length > 0) {
+				// Stuffed base
+				var base_id = $('select#pizza_base').val();
+				if(base_id == 3) {
+					add_price = (get_stuffing_price() * 100) * quantity;
+				}	
+			}
+			
+			// Calc price
+			var curr_add_price = add_price;
+			
+			// Toppings price
+			if($('input#toppings_allowed').length > 0) {
+				// Calc toppings cost
+				var toppings_cost = calculate_toppings_cost() * 100;
+				curr_add_price = curr_add_price + (toppings_cost * quantity);
+			}
+			
+			// Finalise
+			var final_price = temp_start_price + temp_add_price + curr_add_price;
+			temp_curr_add_price = curr_add_price;
+			var display_cost = (final_price / 100).toFixed(2);
+			$('span#cost').html(display_cost);
+		}
+	}
+}
+
+/*
+	Products: Add to cart
+*/
+function bind_add_to_order() {
+	// Add to order button
+	$('a.add_to_order').live('click', function() {
+		if($('div#custom_toppings').length > 0) {
+			if(available_toppings > 0) {
+				var term = available_toppings == 1 ? 'topping' : 'toppings';
+				var r = confirm("You may add "+available_toppings+" "+term+" for free. \nAre you sure you want to continue? \n\nPress OK to add to cart, CANCEL to continue customising.");
+				if (r==true) {
+				// continue
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		
+		if($('div#mask_product').length > 0) {
+			// Mask it
+			$('div#product_mask')
+				.width($('div#mask_product').width())
+				.height($('div#mask_product').height())
+				.show();
+			// Request
+			add_request();
+		}
+		return false;
+	});
+	
+	// Add to order button, quick
+	$('a.add_to_order_quick').live('click', function() {
+		// Request, quick
+		var thisid = $(this).attr('id').split('_');
+		var product_id = thisid[1];
+		add_request_quick(product_id);
+		return false;
+	});
+	
+	// Cancel order button
+	$('a.cancel_order').live('click', function() {
+		if($('input#static_page').length > 0) {
+			// Go to MENU page
+			return true;
+		}
+		else{
+			// Close popover
+			hs.close();
+			return false;
+		}
+	});
+}
+function add_request() {
+	var send_data = $('form#productform').serialize();
+	$.ajax({
+		url: docRoot + 'ajax/?do=add_to_cart',
+		type: 'POST',
+		data: send_data,
+		success: function(data) {
+			$('div#mask_product').hide();
+			$('div#product_mask').hide();
+			$('div#post_add').html(data).show();
+			
+			update_cart();
+			if($('input#static_page').length > 0) {
+				if($('input#static_page').val() == 1) {
+					// Scroll to top of added window
+					/*
+					$('html,body').animate({
+						scrollTop: ($("div#addedto_window").offset().top - 200)
+					}, 300);
+					*/
+					
+					product_scroll("div#addedto_window", 300);
+					
+					// Floaty buttons (finished)
+					floaty_foot_checkout();
+				}
+			}
+		}
+	});
+}
+
+var current_counts = new Array();
+function add_request_quick(product_id) {
+	var quantity = parseInt($('input#quick_quantity_'+parseInt(product_id)).val());
+	var send_data = {'product_id': product_id, 'quantity': quantity};
+	//var current_count = parseInt($('span#quick_add_count_'+parseInt(product_id)).html());
+	current_counts[product_id] = current_counts[product_id] !== undefined ? current_counts[product_id] + quantity : quantity;
+	
+	$('div.menu_quickadded').hide();
+	$('div.menu_about').show();
+	
+	$.ajax({
+		url: docRoot + 'ajax/?do=add_to_cart&quick_add=1',
+		type: 'POST',
+		data: send_data,
+		success: function(data) {
+			$('span#prod_add_q_'+product_id).hide();
+			$('span#quick_add_count_'+parseInt(product_id)).html((current_counts[product_id]));
+			$('span#prod_add_a_'+product_id).fadeIn();
+			update_cart();
+			
+			$('div#menuadded_'+parseInt(product_id)+' div.menu_inner_quick').html(data);
+			
+			$('div#menuabout_'+parseInt(product_id)+'').hide();
+			$('div#menuadded_'+parseInt(product_id)+'').show();
+		}
+	});
+}
+
+
+/*
+	Products: UI
+*/
+var bound_shop_selections = false;
+function bind_shop_selections() {
+	if(bound_shop_selections === false) {
+		// Bind Pizza Size
+		$('select#pizza_size').live('change', function() {
+			shop_update_size($(this).val());
+			update_price();
+		});
+		
+		// Bind Pizza Size
+		$('select#pizza_base').live('change', function() {
+			shop_update_base($(this).val());
+			update_price();
+		});
+		
+		// Bind Pizza Stuffin'
+		$('select#stuffed_base').live('change', function() {
+			update_price();
+		});
+		
+		//$('input#quantity').bind('blur', function() {
+		$(document).on('blur', 'input#quantity', function() {
+			check_quantity();
+			update_price();
+			return true;
+		});
+		
+		// NutritionalAllergens2022
+		$(document).on('change', 'select#pizza_size, select#pizza_base, select#stuffed_base', function() {
+			menu_nutritional_calc();
+		});
+		
+		bound_shop_selections = true;
+	}
+	
+	// Set defaults
+	shop_update_size($('select#pizza_size').val());
+	
+	// Set defaults
+	shop_update_base($('select#pizza_base').val());
+	
+	// Initial price
+	update_price();
+}
+
+// NutritionalAllergens2022
+function menu_nutritional_calc() {
+	var size_id = parseInt($('select#pizza_size').val());
+	var pizza_base = parseInt($('select#pizza_base').val());
+	var stuffed_base = parseInt($('select#stuffed_base').val());
+	var product_id = $('select#product_id').length > 0 ? parseInt($('select#product_id').val()) :  parseInt($('input#product_id').val());
+	
+	// Request new data
+	var send_data = {
+		'product_id': parseInt(product_id), 
+		'size_id': parseInt(size_id), 
+		'pizza_base': parseInt(pizza_base), 
+		'stuffed_base': parseInt(stuffed_base)
+	};
+	
+	// If we have toppings customisation
+	if($('div#custom_toppings').length > 0 && $('div#custom_toppings').is(':visible')) {
+		var toppings_list = {};
+		$('div#custom_toppings div.option_select_small').each(function(index) {
+			var on_pizza = $(this).find('input.clickybox_val').val();
+			var toppings = 0;
+			var thisid = $(this).find('input.clickybox_val').attr('id').split('_');
+			var ingredient_id = thisid[1];
+			toppings_list[parseInt(ingredient_id)] = parseInt(on_pizza);
+		});
+		
+		console.log(toppings_list);
+		send_data.toppings = toppings_list;
+	}
+	else {
+		console.log("No toppings");
+	}
+	
+	
+	$.ajax({
+		url: docRoot + 'ajax/?do=menu_nutritional_calc',
+		type: 'post',
+		data: send_data,
+		dataType: 'JSON',
+		timeout: 2500,
+		success: function(data) {
+			if(typeof data === 'object' && data !== null) {
+				$('span#nutrition_serves').html(data.serves);
+				$('span#nutrition_kcal').html(data.kcal);
+				if($('span#nutrition_serves2').length > 0) {
+					$('span#nutrition_serves2').html(data.serves);
+					$('span#nutrition_kcal2').html(data.kcal);
+				}
+			}
+		},
+		error: function(e,d) {
+			console.log({e});
+			console.log({d});
+		}
+	});
+}
+
+function check_quantity() { 
+	var quan = $('input#quantity').val();
+	if(isNaN(quan)) {
+		$('input#quantity').val(1);
+	}
+	if(quan < 1) {
+		$('input#quantity').val(1);
+	}
+	if(quan > parseInt(max_quantity)) {
+		$('input#quantity').val(parseInt(max_quantity));
+	}
+}
+
+function shop_update_size(size_id) {
+	var size_text = $('select#pizza_size :selected').text();
+	update_stuffing_prices();
+}
+function shop_update_base(base_id) {
+	var base_text = $('select#pizza_base :selected').text();
+	if(base_id == 3) {
+		update_stuffing_prices();
+		$('div#choose_stuffed').fadeIn();
+	}
+	else{
+		$('div#choose_stuffed').hide();
+	}
+}
+function update_stuffing_prices() {
+	var size_id = $('select#pizza_size').val();
+	var stuffed_base_id = $('select#stuffed_base').val();
+	$('select#stuffed_base option').each(function() {
+		var base_id = $(this).val();
+		var stuffing_price = $('input#stuffed_'+base_id+'_'+size_id).val();
+		var textgo = $(this).text().split('+ \u00A3');
+		$(this).text(textgo[0]+' + \u00A3'+stuffing_price);
+	});
+}
+function get_stuffing_price() {
+	var size_id = $('select#pizza_size').val();
+	var stuffed_base_id = $('select#stuffed_base').val();
+	var stuffing_price = $('input#stuffed_'+stuffed_base_id+'_'+size_id).val();
+	return stuffing_price;
+}
+function get_topping_price() {
+	// Are we on half_half UI?
+	var special_product_id = 0;
+	var multiplier = 1;
+	if($('input#special_id').length > 0) {
+		var special_product_id = $('input#special_id').val();
+	}
+	if(special_product_id == 714) {
+		// Yes, we are
+		multiplier = 0.5;
+	}
+	
+	var size_id = $('select#pizza_size').val();
+	var topping_price = $('input#topping_price_'+size_id).val() * 100;
+	topping_price = (topping_price * multiplier);
+	$('span#topping_cost').html((topping_price / 100).toFixed(2));
+	
+	// Bind any size change
+	$('select#pizza_size').bind('change', function() {
+		var size_id = $('select#pizza_size').val();
+		var topping_price = $('input#topping_price_'+size_id).val() * 100;
+		topping_price = (topping_price * multiplier);
+		$('span#topping_cost').html((topping_price / 100).toFixed(2));
+	});
+	
+	return ((topping_price / 100).toFixed(2));
+}
+
+/* Specials loading state */
+function specials_is_loading(loading_bool) {
+	if(loading_bool == true) {
+		$('a.add_continue').html('Loading...');
+		specials_loaded = false;
+		// Mask
+		$('div#product_mask')
+			.width($('div#mask_product').width())
+			.height($('div#mask_product').height())
+			.show();
+	}
+	else {
+		$('a.add_continue').html('<i class="icon ion-plus-circled"></i> Add &amp; continue');
+		specials_loaded = true;
+		// Mask
+		$('div#product_mask').hide();
+	}
+}
+
+/* Specials */
+var specials_loaded = false;
+function bind_load_special_stages() {
+	$('a.add_continue').live('click', function() {
+		if(specials_loaded === false) {
+			return false;
+		}
+		
+		
+		if($('div#custom_toppings').length > 0) {
+			if(available_toppings > 0) {
+				var term = available_toppings == 1 ? 'topping' : 'toppings';
+				var r = confirm("You may add "+available_toppings+" "+term+" for free. \nAre you sure you want to continue?");
+				if (r==true) {
+				// continue
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		
+		// Bind warning
+		menu_bind_page_warning();
+		
+		load_special_stage();
+		return false;
+	});
+	
+	// Trigger first load.
+	load_special_stage();
+}
+function load_special_stage() {
+	var send_data = $('form#productform').serialize();
+	
+	// Update temp pricing
+	temp_add_price = parseInt(temp_add_price) + parseInt(temp_curr_add_price);
+	
+	// Mask
+	$('div#product_mask')
+		.width($('div#mask_product').width())
+		.height($('div#mask_product').height())
+		.show();
+	
+	// Request next stage
+	$.ajax({
+		url: docRoot + 'ajax/?do=special_offer_stage',
+		type: 'post',
+		data: send_data,
+		success: function(data) {
+			$('div#product_mask').hide();
+			$('div#special_area').html(data);
+			
+			if(data != '') {
+				$('div#product_info_extra').show();
+			}
+			
+			// Are we on a stage...
+			if($('input#stage').length > 0) {
+				// Init first product preview
+				request_product_preview();
+				
+				// Get stage from new dom elements
+				var current_stage = parseInt($('input#stage').val());
+				if(current_stage > 1) {
+					// Unhide start over button
+					$('div#start_over_button').show();
+				}
+				
+				if(current_stage == 1 && data != '') {
+					/*
+					$('html,body').animate({
+					scrollTop: $("div#special_area").offset().top - 150
+					}, 200);
+					*/
+					product_scroll("div#special_area", 200);
+				}
+				
+				// Floaty buttons (stages)
+				floaty_foot_special_stage();
+				
+			}
+			// ... or are we finished?
+			else {
+				update_cart();
+				menu_unbind_page_warning();
+				
+				// See if we're not on the select size "stage"
+				if($('div#specials_select_size').length == 0) {
+					// Floaty buttons (finished)
+					floaty_foot_checkout();
+				}
+				
+			}
+			
+			// Prepare to get some scrolling up in this.
+			var can_order_trigger = $('input#can_order_trigger').length > 0 ? parseInt($('input#can_order_trigger').val()) : 1;
+			if(can_order_trigger == 1) {
+				product_scroll("div#special_area", 100);
+			}
+
+			/*
+			var window_pos = window.pageYOffset;
+			var selection_pos = $("div#special_area").offset().top - 150;
+			
+			if(window_pos > selection_pos) {
+				// Scroll to top of selection area, if we can't see it
+				$('html,body').animate({
+				scrollTop: selection_pos
+				}, 300);
+			}
+			*/
+		}
+	});
+}
+function bind_product_preview() {
+	// Bind live
+	$('select#product_id').live('change', function() {
+		request_product_preview();
+	});
+}
+function request_product_preview() {
+	var product_id = $('select#product_id').val();
+	
+	// Disable specials continue
+	specials_is_loading(true);
+	
+	// Mask
+	$('div#image_mask')
+		.width($('div#product_item_image').width())
+		.height($('div#product_item_image').height())
+		.show();
+	
+	// Request product
+	$.ajax({
+		url: docRoot + 'ajax/?do=product_info&product_id='+escape(parseInt(product_id))+'',
+		dataType: 'json',
+		success: function(data) {
+			$('div#product_item_image').css("background-image", "url('"+data.image_url+"')");
+			
+			// Re-enable specials continue
+			specials_is_loading(false);
+			
+			// Is it the FREE CHOICE?
+			if(product_id == 615 || product_id == 892) {
+				// Yes, display customise toppings UI
+				customise_toppings();
+			}
+			
+			// Flag veg
+			if(data.flag_veg == 1) {
+				$('div#flag_veg').show();
+			}
+			else{
+				$('div#flag_veg').hide();
+			}
+			
+			// Flag hot
+			if(data.flag_hot == 1) {
+				$('div#flag_hot').show();
+			}
+			else{
+				$('div#flag_hot').hide();
+			}
+			
+			// Unmask
+			$('div#image_mask').hide();
+			
+			// Load in description
+			if($('div#product_description').length > 0) {
+				$('div#product_description').html(data.description);
+			}
+			
+			// Force base?
+			
+			if(data.force_base > 0) {
+				$('select#pizza_base').val(3);
+				$('select#stuffed_base').val(data.force_base);
+				$('div#choose_stuffed').show();
+			}/*
+			else {
+				$('select#pizza_base').val(2);
+				//$('select#stuffed_base').val(data.force_base);
+				$('div#choose_stuffed').hide();
+			}
+			*/
+			
+			// Load in pricing and topping info (pizza)
+			if($('input#toppings_allowed').length > 0) {
+				// Set pricing
+				//var price_count = $('input.pricing_pizza').length; // BUG_FIX_10-5-14
+				var price_count = 3;
+				for(var i=1;i<=price_count;i++) {
+					if($('input#price_'+i).length > 0) {
+						$('input#price_'+i).val(data.pricing[i]);
+					}
+				}
+				
+				// Load toppings allowed
+				$('input#toppings_allowed').val(parseInt(data.toppings_count));
+			}
+			
+			// Process toppings
+			process_toppings_from_product_info(data.toppings);
+			
+			// Bind and process toppings
+			bind_custom_toppings();
+			
+			// Update price
+			update_price();
+			
+			// NutritionalAllergens2022
+			menu_nutritional_calc();
+		}
+	});
+}
+
+/* Menu unload warning */
+var menu_page_warning = false;
+var menu_use_unload_warning = true;
+function menu_bind_page_warning() {
+	if(menu_use_unload_warning) {
+		if(menu_page_warning === false) {
+			$(window).bind("beforeunload", function() {
+				return "You haven't finished adding your Special Offer yet.";
+			});
+			menu_page_warning = true;
+		}
+	}
+}
+function menu_unbind_page_warning() {
+	if(menu_use_unload_warning) {
+		if(menu_page_warning === true) {
+			$(window).unbind("beforeunload");
+			menu_page_warning = false;
+		}
+	}
+}
+
+function too_many_toppings_removed() {
+	var doc_height = $(window).height();
+	var doc_width = $(window).width() - 50;
+	
+	
+	
+	// Override
+	doc_height = 550;
+	
+	if(doc_width > 900) {
+		doc_width = 700;
+	}
+	
+	// Open Wrapper Picker
+	hs.overrides.push('onAfterExpand');
+	hs.htmlExpand(null, {
+		objectType: 'ajax',
+		src: docRoot + 'ajax/?do=too_many_toppings_removed',
+		width: doc_width,
+		height: doc_height,
+		wrapperClassName: 'no-footer no-move custom-header no-header',
+		dimmingOpacity: 0.30,
+		preserveContent: false,
+		onAfterExpand: function(expander) {
+			// After it has expanded..
+			
+			// Start over button is only on specials UI
+			if($('div#start_over_button').length > 0) {
+				// If we're on a special offer, remove the build your own button to prevent flow disruption
+				$('a#build_own_pizza').hide();
+			}
+			
+			// Show buttons
+			$('div#too_many_toppings_buttons').show();
+		}
+	});
+	return false;
+}
+
+/* Oct 2015 */
+var special_ui_counter = 0;
+function special_snax() {
+	hs.registerOverlay({
+		html: '<div class="closebutton" onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		useOnHtml: true,
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+}
+function snax_add(product_id) {
+	var prod_1 = parseInt($('input#prodid_1').val());
+	var prod_2 = parseInt($('input#prodid_2').val());
+	var prod_3 = parseInt($('input#prodid_3').val());
+	if(prod_1 == product_id || prod_2 == product_id || prod_3 == product_id) {
+		$('div#product_'+product_id).removeClass('product_item_active');
+		if(prod_1 == product_id) {$('input#prodid_1').val(''); $('input#prodidcom_1').val(''); special_ui_counter--;}
+		if(prod_2 == product_id) {$('input#prodid_2').val(''); $('input#prodidcom_2').val(''); special_ui_counter--;}
+		if(prod_3 == product_id) {$('input#prodid_3').val(''); $('input#prodidcom_3').val(''); special_ui_counter--;}
+	}
+	else {
+		var found = false;
+		$('input.prodids').each(function(index) {
+			if($(this).val() == '' && found === false) {
+				$(this).val(product_id);
+				$('div#product_'+product_id).addClass('product_item_active');
+				found = true;
+				special_ui_counter++;
+				
+				var thisid = $(this).attr('id').split('_');
+				var prod_item_id = thisid[1];
+				
+				if(product_id == 1018) {
+					snax_dip_picker(prod_item_id);
+				}
+			}
+		});
+		
+		if(found === false) {
+			alert("Sorry, you may only select 3 SNAX\n\nClick one again to unselect it.");
+		}
+	}
+	
+	if(special_ui_counter >= 3) {
+		$('div.product_item').addClass('product_item_transparent');
+		$('span#snax_button').html('Add to cart');
+		
+		if(found) {
+			$('html,body').animate({
+			scrollTop: $("div#snax_add_button").offset().top
+			}, 300);
+		}
+	}
+	else {
+		$('div.product_item').removeClass('product_item_transparent');
+		$('span#snax_button').html('Select '+(3 - special_ui_counter)+' more ');
+	}
+	
+	return false;
+}
+
+var active_prod_item_id = 0;
+var dip_count = 0;
+function snax_dip_picker(prod_item_id) {
+	// Override
+	doc_height = 480;
+	doc_width = 320;
+	
+	active_prod_item_id = prod_item_id;
+	
+	// Clear comment
+	$('input#prodidcom_'+active_prod_item_id).val('4 x Random');
+	$('span#product_desc_1018').html('4 x Random');
+	
+	// Open Wrapper Picker
+	hs.overrides.push('onAfterExpand');
+	hs.htmlExpand(null, {
+		objectType: 'ajax',
+		src: docRoot + 'ajax/?do=snax_dips',
+		width: doc_width,
+		height: doc_height,
+		wrapperClassName: 'no-footer no-move custom-header no-header',
+		dimmingOpacity: 0.30,
+		preserveContent: false,
+		onAfterExpand: function(expander) {
+			// After it has expanded..
+			dip_count = 0;
+			snax_dip_count();
+		}
+	});
+}
+
+
+function snax_dip_comment(comment) {
+	var comment_so_far = $('input#prodidcom_'+active_prod_item_id).val();
+	if(dip_count == 0) {
+		$('input#prodidcom_'+active_prod_item_id).val(comment);
+		$('span#product_desc_1018').html(comment);
+	}
+	else {
+		$('input#prodidcom_'+active_prod_item_id).val(comment_so_far+', '+comment);
+		$('span#product_desc_1018').html(comment_so_far+', '+comment);
+	}
+	dip_count++;
+	
+	if(dip_count == 4) {
+		$('div#dip_selector-o-matic').hide();
+		hs.close();
+		snax_process_dip_comment();
+	}
+	else {
+		snax_dip_count();
+		$('div#dip_selector-o-matic').hide().fadeIn();
+	}
+	return false;
+}
+
+function snax_dip_count() {
+	$('span#dip_counter').html(dip_count + 1);
+}
+
+function snax_add_to_cart() {
+	var form_data = $('form#snax_prod').serialize();
+	$.ajax({
+		url: docRoot + 'ajax/?do=add_snax_to_cart',
+		type: 'POST',
+		data: form_data,
+		success: function(data) {
+			
+			$('div#special_ui').hide();
+			$('div#snax_result').html(data);
+			
+			/*
+			$('div#mask_product').hide();
+			$('div#product_mask').hide();
+			$('div#post_add').html(data).show();
+			update_cart();
+			if($('input#static_page').length > 0) {
+				if($('input#static_page').val() == 1) {
+					// Scroll to top of added window
+					$('html,body').animate({
+					scrollTop: $("div#addedto_window").offset().top
+					}, 1000);
+				}
+			}
+			*/
+		}
+	});
+	return false;
+}
+
+function snax_process_dip_comment() {
+	var comment = $('span#product_desc_1018').html();
+	var dips = comment.split(',');
+	for(i = 0; i < dips.length; i++) {
+		dips[i] = dips[i].trim();
+	}
+	var result = array_counter(dips);
+	var new_comment = '';
+	for(i = 0; i < result[0].length; i++) {
+		new_comment += new_comment == '' ? result[1][i]+' x '+result[0][i].replace("&amp;", "&") : ', '+result[1][i]+' x '+result[0][i].replace("&amp;", "&");
+	}
+	$('span#product_desc_1018').html(new_comment);
+	$('input#prodidcom_'+active_prod_item_id).val(new_comment);
+}
+
+function array_counter(arr) {
+	var a = [], b = [], prev;
+	arr.sort();
+	for(var i = 0; i < arr.length; i++) {
+		if(arr[i] !== prev) {
+			a.push(arr[i]);
+			b.push(1);
+		} else {
+			b[b.length-1]++;
+		}
+		prev = arr[i];
+	}
+	return [a, b];
+}
+
+function bind_special_offer_continue() {
+	$('a#special_offer_continue').on('click', function() {
+		product_scroll("div#special_area", 300);
+		return false;
+	});
+}
+
+function product_scroll_old(target, speed) {
+	if($(target).length == 0) {
+		console.log(target+' does not exist.');
+		return false;
+	}
+	var desktop_margin = 150;
+	var mobile_margin = 70;
+	var window_width = $(window).width();
+	var use_margin = (window_width < 768) ? mobile_margin : desktop_margin;
+	var selection_pos = $(target).offset().top - use_margin;
+	// Scroll to top of selection area, if we can't see it
+	$('html,body').animate({
+		scrollTop: selection_pos
+	}, speed);
+	
+	return false;
+}
+
+function menu_huge_render() {
+	var imghuge 		= $('div#menu_huge').data('imghuge');
+	var imghugemobile 	= $('div#menu_huge').data('imghugemobile');
+	var window_width = $(window).width();
+	if(window_width < 768) {
+		$('div#menu_huge').css('background-image', 'url(' + imghugemobile + ')');
+	}
+	else {
+		$('div#menu_huge').css('background-image', 'url(' + imghuge + ')');
+	}
+}
+
+
+/* Mobile Footer Floaty McFloatface */
+function floaty_foot_auto() {
+	$(document).ready(function() {
+		$().mlwFloatyFoot({
+			spawn:'div#floaty_foot_spawn',
+			scan:'div#floaty_foot_auto_buttons'
+		});
+	});
+}
+function floaty_foot_trigger(target) {
+	$().mlwFloatyFoot({
+		spawn:'div#floaty_foot_spawn',
+		scan:target
+	});
+}
+
+function floaty_add_to_order_init() {
+	$(document).ready(function() {
+		floaty_add_to_order();
+	});
+}
+
+function floaty_pizza_store_select_init() {
+	$(document).ready(function() {
+		floaty_store_select();
+	});
+}
+
+function floaty_add_to_order() {
+	var manual_buttons = new Array();
+	manual_buttons[0] = {'text': '<i class="icon ion-plus-circled"></i> Add to order', 'class': 'button_flat button_flat_red add_to_order', 'href': '#', 'onclick': ''};
+	$().mlwFloatyFoot({buttons:manual_buttons});
+	//$('div#single_controls a.add_to_order').addClass('mobile_hide');
+}
+function floaty_store_select() {
+	var manual_buttons = new Array();
+	manual_buttons[0] = {'text': 'Please select store', 'class': 'button_flat button_flat_blue', 'href': '#', 'onclick': 'return customise_toppings();'};
+	$().mlwFloatyFoot({buttons:manual_buttons});
+	//$('div#single_controls a.add_to_order').addClass('mobile_hide');
+}
+
+function floaty_foot_checkout() {
+	var manual_buttons = new Array();
+	manual_buttons[0] = {'text': '<i class="icon ion-android-cart"></i> Proceed to checkout', 'class': 'button_flat button_flat_yellow', 'href': docRoot+'checkout/cart', 'onclick': ''};
+	$().mlwFloatyFoot({buttons:manual_buttons});
+	//$('div#add_button_one a.add_continue').addClass('mobile_hide');
+}
+function floaty_foot_special_stage() {
+	var manual_buttons = new Array();
+	manual_buttons[0] = {'text': '<i class="icon ion-plus-circled"></i> Add &amp; continue', 'class': 'button_flat button_flat_red add_continue', 'href': '#', 'onclick': ''};
+	$().mlwFloatyFoot({buttons:manual_buttons});
+	//$('div#add_button_one a.add_continue').addClass('mobile_hide');
+}
+
+
+
+
+
+
+
+
+
+
+(function ( $ ) {
+	$.fn.mlwFloatyFoot = function( options ) {
+		// Default options
+		var settings = $.extend({
+			parentDivID: 'floaty_foot_sticky',
+			close: false,
+			spawn: 'div#floaty_foot_spawn',
+			scan: false,
+			markup: false,
+			on_open: false,
+			buttons: []
+		}, options );
+		
+		var floaty_count = 0;
+		var floaty_init = true;
+		
+		var viewport_width = new Array();
+		viewport_width['x'] = $(window).width();
+		viewport_width['y'] = $(window).height();
+		
+		function floaty_foot_markup(id) {
+			var markup = '<div id="'+id+'">';
+			markup += '</div>';
+			return markup;
+		}
+		
+		function floaty_load_buttons(target, buttons_markup) {
+			$(target).html('<div class="fpad">'+buttons_markup+'</div>');
+		}
+		
+		// If we have no foot in existence
+		if(0 == $('div#'+settings.parentDivID).length) {
+			if($(settings.spawn).length == 0) {
+				console.log('FloatyFootError: Attach to '+(settings.spawn)+' failed. Does that element exist?');
+				return false;
+			}
+			$(settings.spawn).html(floaty_foot_markup(settings.parentDivID)).show();
+			floaty_init = true;
+		}
+		
+		// Close call?
+		if(true === settings.close) {
+			$(settings.spawn).html('').hide();
+			return false;
+		}
+		
+		if(false !== settings.scan) {
+			floaty_load_buttons('div#'+settings.parentDivID, $(settings.scan).html());
+		}
+		
+		if(settings.buttons.length > 0) {
+			var buttanz = '';
+			$.each(settings.buttons, function(index, obj){
+				buttanz += '<a href="'+obj.href+'" class="'+obj.class+'" onclick="'+obj.onclick+'">'+obj.text+'</a> ';
+			});
+			floaty_load_buttons('div#'+settings.parentDivID, buttanz);
+		}
+		
+		return false;
+	};
+}( jQuery ));

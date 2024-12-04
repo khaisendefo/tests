@@ -1,0 +1,352 @@
+div.header {
+    z-index: 100;
+    position: absolute;
+    width: 100%;
+    margin: 0;
+}
+
+div.header_red {
+	/* D8B37C - FCE7B2 ~ */
+	background: #D8B37C;
+	background: rgb(216,179,124); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgba(216,179,124,1) 0%, rgba(252,231,178,1) 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d8b37c', endColorstr='#fce7b2',GradientType=0 ); /* IE6-9 */
+
+	-moz-box-shadow: 0 2px 2px rgba(29,29,33,0.2);
+	-webkit-box-shadow: 0 2px 2px rgba(29,29,33,0.2);
+	box-shadow: 0 2px 2px rgba(29,29,33,0.2);
+}
+div#footer_top {
+	background: #D8B37C;
+	background: rgb(216,179,124); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgba(216,179,124,1) 0%, rgba(252,231,178,1) 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d8b37c', endColorstr='#fce7b2',GradientType=0 ); /* IE6-9 */
+}
+
+div#footer_top ul li a {
+	color: #956113;
+	text-shadow: 1px 1px 1px #FFF;
+}
+div#footer_top ul li a:hover {
+	color: #FFFFFF;
+	text-shadow: 1px 1px 1px #111;
+}
+
+/* Entry overrides */
+div#entry {
+	height: auto;
+}
+video {
+	background: url('../vid/videos/pgg_500pizza.jpg') no-repeat;
+}
+
+
+/* Gold page */
+div.gold_page {
+	position: relative;
+	height: auto;
+	padding: 100px 0 0 0;
+}
+div.gold_logo {
+	position: relative;
+	width: 280px;
+	height: 200px;
+	float: left;
+	margin: 60px 0 0 0;
+	/*top: 150px;
+	left: 50px;*/
+}
+div.gold_logo p {
+	margin: 6px 0 0 0;
+	font-family: "Times New Roman", Georgia, Serif;
+	font-weight: normal;
+	font-size: 14px;
+	font-style: italic;
+	color: #FFFFFF;
+	text-align: center;
+}
+
+div.gold_text {
+	position: relative;
+	width: 420px;
+	height: auto;
+	border: 2px solid #FFFFFF;
+	/*top: 100px;
+	right: 50px;*/
+	float: right;
+	background: #D8B37C;
+	background: rgb(216,179,124); /* Old browsers */
+	background: -moz-linear-gradient(45deg,  rgba(216,179,124,1) 0%, rgba(252,231,178,1) 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d8b37c', endColorstr='#fce7b2',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+	
+	-moz-box-shadow: 0 2px 2px rgba(29,29,33,0.5);
+	-webkit-box-shadow: 0 2px 2px rgba(29,29,33,0.5);
+	box-shadow: 0 2px 2px rgba(29,29,33,0.5);
+	
+	text-align: center;
+	margin: 0 0 60px 0;
+}
+div.gold_text_pad {
+	padding: 40px;
+}
+
+p.gold_header,
+h1.gold_header {
+	font-family: "Times New Roman", Georgia, Serif;
+	font-weight: normal;
+	font-size: 18px;
+	font-style: italic;
+	color: #333333;
+	text-align: center;
+	text-transform: none;
+	margin: 0 0 20px 0;
+}
+p.gold_includes {
+	margin: 0;
+	font-weight: bold;
+}
+hr.gold_hr {
+	width: 40%;
+	margin: 30px auto 30px auto;
+	border-top: 1px solid #333333;
+}
+hr.gold_hr_lowbord {
+	width: 40%;
+	margin: 5px auto 5px auto;
+	border-top: 1px solid #555555;
+}
+
+p.gold_small {
+	font-family: "Times New Roman", Georgia, Serif;
+	font-weight: normal;
+	font-size: 16px;
+	font-style: italic;
+	color: #333333;
+	text-align: center;
+	text-transform: none;
+	margin: 0 0 20px 0;
+}
+
+
+div.as_seen_on_tv {
+	display: block;
+	color: #FFF;
+	width: 80px;
+	height: 63px;
+	background: none;
+	background-image: url('../img/gold/as_seen_on_tv.png');
+	background-repeat: no-repeat;
+	background-position: 0px 0px;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	position: absolute;
+	top: -15px;
+	right: -15px;
+	z-index: 2;
+	-webkit-transform: rotate(3deg);
+    -moz-transform: rotate(3deg);
+    -ms-transform: rotate(3deg);
+    -o-transform: rotate(3deg);
+}
+
+div#gold_bottom {
+	background: #c0a669;
+	border-top: 3px solid #b07300;
+	
+	background: -moz-linear-gradient(45deg,  rgba(216,179,124,1) 0%, rgba(252,231,178,1) 100%);
+	background: -webkit-linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%);
+	background: linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d8b37c', endColorstr='#fce7b2',GradientType=1 );
+}
+
+div.gold_half {
+	display: block;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width: 50%;
+	float: left;
+}
+div.gold_half_pad {
+	padding: 40px;
+}
+
+div.news_logo {
+	display: block;
+	width: 100px;
+	height: 50px;
+	float: left;
+	margin: 30px;
+}
+div.news_logo img {
+	display: block;
+	width: 100%;
+	height: auto;
+	/*-webkit-filter: grayscale(100%);
+    filter: grayscale(100%);*/
+}
+
+iframe.youtube_frame {
+	width: 100%;
+	height: 300px;
+	margin: 25px 0 0 0;
+}
+
+div.voucher_area {
+	background: #c0a669;
+	border-top: 1px solid #FFF;
+	position: relative;
+	padding: 40px 20px 20px 20px;
+	
+	background: -moz-linear-gradient(45deg,  rgba(216,179,124,1) 0%, rgba(252,231,178,1) 100%);
+	background: -webkit-linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%);
+	background: linear-gradient(45deg,  rgba(216,179,124,1) 0%,rgba(252,231,178,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d8b37c', endColorstr='#fce7b2',GradientType=1 );
+}
+div.voucher_area h3 {
+	font-size: 20px;
+    margin: 0 0 15px 0;
+	color: #4A4B4C;
+	text-shadow: 1px 1px 0px #e7c892;
+}
+div.voucher_area p {
+	color: #111;
+	font-size: 14px;
+	text-shadow: 1px 1px 0px #e7c892;
+}
+div.voucher_area p span {
+	font-size: 16px;
+	font-weight: bold;
+	color: #0054A5;
+	text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+}
+div.voucher_code {
+    position: absolute;
+    left: -10px;
+    top: -5px;
+    font-size: 20px;
+    width: 100px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: #E0121A;
+    background: #0054A5;
+    padding: 10px;
+    line-height: 1;
+    z-index: 2;
+    text-transform: uppercase;
+    -webkit-transform: rotate(-2deg);
+    -moz-transform: rotate(-2deg);
+    -ms-transform: rotate(-2deg);
+    -o-transform: rotate(-2deg);
+    text-shadow: 1px 2px 1px rgba(29,29,33,0.4);
+    -moz-box-shadow: 0 2px 2px rgba(29,29,33,0.4);
+    -webkit-box-shadow: 0 2px 2px rgba(29,29,33,0.4);
+    box-shadow: 0 2px 2px rgba(29,29,33,0.4);
+}
+
+/*
+div.news_logo:hover img {
+	-webkit-filter: none;
+    filter: none;
+}
+*/
+
+/******************************/
+/*
+	Responsive
+*/
+
+@media only screen and (min-width: 1200px) and (max-width: 1500px) {
+	div.news_logo {
+		margin: 20px;
+	}
+}
+/* Desktops */
+@media only screen and (min-width: 980px) and (max-width: 1199px) {
+	div.news_logo {
+		margin: 10px;
+	}
+	
+}
+/* iPad (or small monitor) Styles */
+@media only screen and (min-width: 769px) and (max-width: 979px) {
+	div.news_logo {
+		display: block;
+		width: 33.3%;
+		height: auto;
+		float: left;
+		margin: 10px 0 10px 0;
+	}
+}
+/* Mobile Styles */
+@media only screen and (min-width: 0px) and (max-width: 768px) {
+	div#welcome,
+	div#entry,
+	div#hold_video {
+		height: 450px;
+		width: 100%;
+		background: url('../img/layout/mobile_background_gold.jpg') top center no-repeat;
+		
+	}
+	div#entry {
+		height: auto;
+	}
+	
+	div.mobile_nav a {
+		background: #C0A669;
+	}
+	div#content_page_bottom {
+		height: 230px;
+	}
+	
+	div.gold_logo {
+		position: relative;
+		width: 280px;
+		height: 200px;
+		float: none;
+		margin: 0 auto 0 auto;
+		/*top: 150px;
+		left: 50px;*/
+	}
+	
+	div.as_seen_on_tv {
+		right: 3px;
+	}
+	
+	div.gold_text {
+		width: 100%;
+		height: auto;
+		float: none;
+		border: none;
+		margin: 0;
+	}
+	
+	div.gold_half_pad {
+		padding: 20px 5px 20px 5px;
+	}
+	div.news_logo {
+		display: block;
+		width: 50%;
+		height: auto;
+		float: left;
+		margin: 10px 0 10px 0;
+	}
+	
+	div.gold_half {
+		float: none;
+		width: 100%;
+	}
+	
+	div.voucher_code {
+		left: 10px;
+		top: -10px;
+	}
+}

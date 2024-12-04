@@ -1,0 +1,276 @@
+/* Location map (store maps) | Author: Mark Willis */
+/* V2, Nov 2015 */
+/* V3, with Mapbox, Apr 2023 */
+var map;
+var marker;
+var shape;
+var myInfoWindowOptions;
+var infoWindow;
+var infoWindow_open = 0;
+//var center = new google.maps.LatLng(50.828464,-0.203876);
+//var markerPosition = new google.maps.LatLng(50.828464,-0.203876);
+
+function location_map(information, postcode, map_lat, map_long, map_x, map_y, map_z) {
+	// Set centre of map, if set
+	var center_lat = map_x > 0 ? map_x : map_lat;
+	var center_lng = map_y > 0 ? map_y : map_long;
+	var center = new google.maps.LatLng(center_lat, center_lng);
+	if(map_lat > 0) {
+		var markerPosition = new google.maps.LatLng(map_lat, map_long);
+		google_draw_map(information, center, markerPosition, map_z);
+	}
+	else{
+		// Get latlong based on Postcode
+		var mygc = new google.maps.Geocoder();
+		mygc.geocode({'address' : postcode+', UK'}, function(results, status){
+			map_lat = results[0].geometry.location.lat();
+			map_long = results[0].geometry.location.lng();
+			var markerPosition = new google.maps.LatLng(map_lat, map_long);
+			// If center of map is not set...
+			if(center_lat == 0) {
+				var center = new google.maps.LatLng(map_lat, map_long);
+			}
+			google_draw_map(information, center, markerPosition, map_z);
+		});
+	}
+}
+function update_store_latlong(show_lat, show_long) {
+	var store_id = $('input#store_id').val();
+	$('div#latlong_map').append('Updating...');
+	$.ajax({
+		url: docRoot + 'ajax/?do=update_latlong&store_id='+escape(store_id)+'&lat='+escape(show_lat)+'&long='+escape(show_long)+'',
+		success: function(data) {
+			if(data == 1) {
+				$('div#latlong_map').append('Updated!');
+			}
+			else{
+				$('div#latlong_map').append('Error!');
+			}
+		}
+	});
+}
+function google_draw_map(information, center, markerPosition, map_z) {
+	var myMapOptions = {
+		zoom: map_z,
+		center: center,
+		streetViewControl: false,
+		scaleControl: false,
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		mapTypeControl: true,
+		mapTypeControlOptions: {
+			style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+		}
+	};
+	map = new google.maps.Map(document.getElementById("googlemap"), myMapOptions);
+	var image = new google.maps.MarkerImage(
+		docRoot + 'img/layout/logo_30.png',
+		new google.maps.Size(30,30),
+		new google.maps.Point(0,0),
+		new google.maps.Point(25,28)
+	);
+	var shadow = new google.maps.MarkerImage(
+		docRoot + 'img/layout/logo_30_shadow.png',
+		new google.maps.Size(69,47),
+		new google.maps.Point(0, 0),
+		new google.maps.Point(15,28)
+	);
+	var shape = {
+		coord: [25,28,25],
+		type: 'circle'
+	};
+	marker = new google.maps.Marker({
+		draggable: false,
+		raiseOnDrag: true,
+		icon: image,
+		shadow: shadow,
+		shape: shape,
+		map: map,
+		position: markerPosition
+	});
+	myInfoWindowOptions = {
+		content: '<div class="info-window-content"><p>'+information+'</p></div>',
+		maxWidth: 275
+	};
+	infoWindow = new google.maps.InfoWindow(myInfoWindowOptions);
+	google.maps.event.addListener(marker, 'click', function() {
+		infoWindow.open(map,marker);
+	});
+	google.maps.event.addListener(marker, 'dragstart', function(){
+		infoWindow.close();
+	});
+}
+// Recieve array of positions and output
+function location_map_multiple() {
+	// Get lat/long of all stores
+	$.ajax({
+		url: docRoot + 'ajax/?do=all_stores_for_map',
+		dataType: 'json',
+		success: function(data) {
+			fire_map_multiple(data.lat_arr, data.lng_arr, data.stores, data.store_ids, data.address_arr, data.phone_arr);
+		}
+	});
+}
+function fire_map_multiple(lat_arr, lng_arr, stores, store_ids, address_arr, phone_arr) {
+	// Create arrays of lat/longs
+	var lat_arr 	= lat_arr.split('|'); //[51.513969,51.582212];
+	var lng_arr 	= lng_arr.split('|'); //[-0.24915,-0.018688];
+	var stores 		= stores.split('|'); //['Acton','Walthamstow'];
+	var store_ids 	= store_ids.split('|'); //[1,81];
+	var addr_ids 	= address_arr.split('|'); //[text,text];
+	var phone_ids 	= phone_arr.split('|'); //[num,num];
+	
+	
+	var zoom_level = 9;
+	// Center of map is first point
+	var center = new google.maps.LatLng(lat_arr[0], lng_arr[0]);
+	// Set options
+	var myMapOptions = {
+		zoom: zoom_level,
+		center: center,
+		streetViewControl: false,
+		scaleControl: false,
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		mapTypeControl: true,
+		mapTypeControlOptions: {
+			style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+		},
+		styles: [{"featureType":"administrative","elementType":"all","stylers":[{"visibility":"on"},{"saturation":-100},{"lightness":20}]},{"featureType":"road","elementType":"all","stylers":[{"visibility":"on"},{"saturation":-100},{"lightness":40}]},{"featureType":"water","elementType":"all","stylers":[{"visibility":"on"},{"saturation":-10},{"lightness":30}]},{"featureType":"landscape.man_made","elementType":"all","stylers":[{"visibility":"simplified"},{"saturation":-60},{"lightness":10}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"visibility":"simplified"},{"saturation":-60},{"lightness":60}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"},{"saturation":-100},{"lightness":60}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"},{"saturation":-100},{"lightness":60}]}]
+	};
+	var image = new google.maps.MarkerImage(
+		docRoot + 'img/layout/logo_30.png',
+		new google.maps.Size(30,30),
+		new google.maps.Point(0,0),
+		new google.maps.Point(25,28)
+	);
+	var shape = {
+		coord: [25,28,25],
+		type: 'circle'
+	};
+	map = new google.maps.Map(document.getElementById("googlemap"), myMapOptions);
+	marker = [];
+	infoWindow = [];
+	for(var i = 0; i < lat_arr.length; i++) {
+		markerPosition = new google.maps.LatLng(lat_arr[i], lng_arr[i]);
+		marker[i] = new google.maps.Marker({
+			draggable: false,
+			raiseOnDrag: true,
+			icon: image,
+			shape: shape,
+			map: map,
+			position: markerPosition,
+			title: "Click to view store"
+		});
+		// Info
+		myInfoWindowOptions = {
+			content: '<div class="info_window_content"><div class="info_window_inner"><p class="title">Pizza GoGo '+stores[i]+'</p><p class="text">'+addr_ids[i]+'<hr /><a href="'+docRoot+'gotostore/'+store_ids[i]+'">View store</a></p></div></div>',
+			maxWidth: 200
+		};
+		infoWindow[i] = new google.maps.InfoWindow(myInfoWindowOptions);
+		google.maps.event.addListener(marker[i], 'click', function(i) {
+			return function() {
+				infoWindow[infoWindow_open].close();
+				infoWindow[i].open(map, marker[i]);
+				infoWindow_open = i;
+			}
+		}(i));
+	}
+}
+// Navigate map to...
+function change_map_location() {
+	var address = $('input#postcode').val();
+	var new_zoom = 13;
+	// Mask
+	/*
+	$('div#map_mask')
+		.width($('div#mask_area').width())
+		.height($('div#mask_area').height())
+		.show();
+	// Set options
+	var myMapOptions = {
+		zoom: new_zoom
+	};
+	*/
+	// Get latlong based on Postcode
+	/*
+	var mygc = new google.maps.Geocoder();
+	mygc.geocode({'address' : address+', UK'}, function(results, status){
+		var pan_lat = results[0].geometry.location.lat();
+		var pan_long = results[0].geometry.location.lng();
+		var new_centre = new google.maps.LatLng(pan_lat, pan_long);
+		map.panTo(new_centre);
+		map.setOptions(myMapOptions);
+		// Unhide mask
+		$('div#map_mask').hide();
+	});
+	*/
+	return false;
+}
+
+var mapbox_map;
+var mapbox_map_init = false;
+function location_map_mapbox() {
+	var center_tottenham = [-0.06978351626293271, 51.59180919212323];
+	var center_country = [-0.203876,50.828464];
+	
+	mapbox_map = new mapboxgl.Map({
+		container: 'googlemap',
+		style: 'mapbox://styles/mapbox/streets-v11',
+		center: center_tottenham,
+		zoom: 9
+	});
+	mapbox_map_init = true;
+	core_quick_store_mapbox = true;
+	
+	mapbox_get_data();
+}
+
+function mapbox_get_data() {
+	// Get lat/long of all stores
+	$.ajax({
+		url: docRoot + 'ajax/?do=all_stores_for_map',
+		dataType: 'json',
+		success: function(data) {
+			mapbox_data_to_map(data.lat_arr, data.lng_arr, data.stores, data.store_ids, data.address_arr, data.phone_arr);
+		}
+	});
+}
+
+function mapbox_data_to_map(lat_arr, lng_arr, stores, store_ids, address_arr, phone_arr) {
+	// Create arrays of lat/longs
+	var lat_arr 	= lat_arr.split('|'); //[51.513969,51.582212];
+	var lng_arr 	= lng_arr.split('|'); //[-0.24915,-0.018688];
+	var stores 		= stores.split('|'); //['Acton','Walthamstow'];
+	var store_ids 	= store_ids.split('|'); //[1,81];
+	var addr_ids 	= address_arr.split('|'); //[text,text];
+	var phone_ids 	= phone_arr.split('|'); //[num,num];
+	
+	// add markers to map
+	//for (const feature of geojson.features) {
+	for(var i = 0; i < lat_arr.length; i++) {
+		const el = document.createElement('div');
+		el.className = 'mapbox_marker';
+		
+		// Mapbox is lng,lat
+		var coords = [lng_arr[i], lat_arr[i]];
+		
+		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coords).addTo(mapbox_map);
+
+		new mapboxgl.Marker(el)
+			.setLngLat(coords)
+			.setPopup(
+				new mapboxgl.Popup({ offset: 25 }) // add popups
+					.setHTML(
+						'<div class="info_window_content"><div class="info_window_inner"><p class="title">Pizza GoGo '+stores[i]+'</p><p class="text">'+addr_ids[i]+'<hr /><a href="'+docRoot+'gotostore/'+store_ids[i]+'">View store</a></p></div></div>'
+					)
+		)
+		.addTo(mapbox_map);
+	}
+}
+
+function location_map_store_view(lat, lng) {
+	mapbox_map.flyTo({
+		center: [parseFloat(lng),parseFloat(lat)],
+		zoom: 12
+	});
+}
